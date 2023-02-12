@@ -6,11 +6,6 @@
 
 package org.antlr.v4.analysis;
 
-import org.antlr.runtime.ANTLRStringStream;
-import org.antlr.runtime.CommonTokenStream;
-import org.antlr.runtime.ParserRuleReturnScope;
-import org.antlr.runtime.RecognitionException;
-import org.antlr.runtime.Token;
 import org.antlr.v4.Tool;
 import org.antlr.v4.misc.OrderedHashMap;
 import org.antlr.v4.parse.ANTLRLexer;
@@ -18,6 +13,11 @@ import org.antlr.v4.parse.ANTLRParser;
 import org.antlr.v4.parse.GrammarASTAdaptor;
 import org.antlr.v4.parse.ScopeParser;
 import org.antlr.v4.parse.ToolANTLRParser;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CodePointCharStream;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.Pair;
 import org.antlr.v4.semantics.BasicSemanticChecks;
 import org.antlr.v4.semantics.RuleCollector;
@@ -125,7 +125,7 @@ public class LeftRecursiveRuleTransformer {
 		((GrammarAST)t.getChild(0)).token = ((GrammarAST)prevRuleAST.getChild(0)).getToken();
 
 		// update grammar AST and set rule's AST.
-		RULES.setChild(prevRuleAST.getChildIndex(), t);
+//		RULES.setChild(prevRuleAST.getChildIndex(), t);
 		r.ast = t;
 
 		// Reduce sets in newly created rule tree
@@ -135,12 +135,12 @@ public class LeftRecursiveRuleTransformer {
 
 		// Rerun semantic checks on the new rule
 		RuleCollector ruleCollector = new RuleCollector(g);
-		ruleCollector.visit(t, "rule");
+//		ruleCollector.visit(t, "rule");
 		BasicSemanticChecks basics = new BasicSemanticChecks(g, ruleCollector);
 		// disable the assoc element option checks because they are already
 		// handled for the pre-transformed rule.
 		basics.checkAssocElementOption = false;
-		basics.visit(t, "rule");
+//		basics.visit(t, "rule");
 
 		// track recursive alt info for codegen
 		r.recPrimaryAlts = new ArrayList<LeftRecursiveRuleAltInfo>();
@@ -184,20 +184,22 @@ public class LeftRecursiveRuleTransformer {
 	}
 
 	public RuleAST parseArtificialRule(final Grammar g, String ruleText) {
-		ANTLRLexer lexer = new ANTLRLexer(new ANTLRStringStream(ruleText));
-		GrammarASTAdaptor adaptor = new GrammarASTAdaptor(lexer.getCharStream());
+		CodePointCharStream input = CharStreams.fromString(ruleText);
+		ANTLRLexer lexer = new ANTLRLexer(input);
+		GrammarASTAdaptor adaptor = new GrammarASTAdaptor(input);
 		CommonTokenStream tokens = new CommonTokenStream(lexer);
-		lexer.tokens = tokens;
 		ToolANTLRParser p = new ToolANTLRParser(tokens, tool);
-		p.setTreeAdaptor(adaptor);
+
 		Token ruleStart = null;
 		try {
-			ParserRuleReturnScope r = p.rule();
-			RuleAST tree = (RuleAST)r.getTree();
-			ruleStart = (Token)r.getStart();
-			GrammarTransformPipeline.setGrammarPtr(g, tree);
-			GrammarTransformPipeline.augmentTokensWithOriginalPosition(g, tree);
-			return tree;
+//			ParserRuleReturnScope r = p.rule();
+//			RuleAST tree = (RuleAST)r.getTree();
+//			ruleStart = (Token)r.getStart();
+//			GrammarTransformPipeline.setGrammarPtr(g, tree);
+//			GrammarTransformPipeline.augmentTokensWithOriginalPosition(g, tree);
+//			return tree;
+			//TODO:
+			return null;
 		}
 		catch (Exception e) {
 			tool.errMgr.toolError(ErrorType.INTERNAL_ERROR,

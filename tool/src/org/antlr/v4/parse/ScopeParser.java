@@ -6,8 +6,8 @@
 
 package org.antlr.v4.parse;
 
-import org.antlr.runtime.BaseRecognizer;
-import org.antlr.runtime.CommonToken;
+import org.antlr.v4.runtime.CommonToken;
+import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.misc.Pair;
 import org.antlr.v4.tool.Attribute;
 import org.antlr.v4.tool.AttributeDict;
@@ -132,9 +132,7 @@ public class ScopeParser {
 			}
 
 			int offset = ((CommonToken) action.getToken()).getStartIndex();
-			attr.token = new CommonToken(action.getToken().getInputStream(), ANTLRParser.ID, BaseRecognizer.DEFAULT_TOKEN_CHANNEL, offset + declOffset + idStart + 1, offset + declOffset + idStop);
-			attr.token.setLine(line);
-			attr.token.setCharPositionInLine(charPositionInLine);
+			attr.token = new CommonToken(new Pair(null, action.getToken().getInputStream()), ANTLRParser.ID, Lexer.DEFAULT_TOKEN_CHANNEL, offset + declOffset + idStart + 1, offset + declOffset + idStop);
 			assert attr.name.equals(attr.token.getText()) : "Attribute text should match the pseudo-token text at this point.";
 		}
 

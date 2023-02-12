@@ -1,6 +1,7 @@
 package org.antlr.v4.automata;
 
-import org.antlr.runtime.tree.CommonTree;
+import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.tool.ErrorType;
 import org.antlr.v4.tool.Grammar;
 
@@ -19,7 +20,7 @@ public class RangeBorderCharactersData {
 		this.mixOfLowerAndUpperCharCase = mixOfLowerAndUpperCharCase;
 	}
 
-	public static RangeBorderCharactersData getAndCheckCharactersData(int from, int to, Grammar grammar, CommonTree tree,
+	public static RangeBorderCharactersData getAndCheckCharactersData(int from, int to, Grammar grammar, ParseTree tree,
 																	  boolean reportRangeContainsNotImpliedCharacters
 	) {
 		int lowerFrom = Character.toLowerCase(from);
@@ -38,7 +39,7 @@ public class RangeBorderCharactersData {
 				}
 			}
 			if (notImpliedCharacters.length() > 0) {
-				grammar.tool.errMgr.grammarError(ErrorType.RANGE_PROBABLY_CONTAINS_NOT_IMPLIED_CHARACTERS, grammar.fileName, tree.getToken(),
+				grammar.tool.errMgr.grammarError(ErrorType.RANGE_PROBABLY_CONTAINS_NOT_IMPLIED_CHARACTERS, grammar.fileName, (Token)tree.getPayload(),
 						(char) from, (char) to, notImpliedCharacters.toString());
 			}
 		}

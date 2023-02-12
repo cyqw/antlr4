@@ -6,7 +6,7 @@
 
 package org.antlr.v4.tool.ast;
 
-import org.antlr.runtime.Token;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.tool.AttributeResolver;
 
 import java.util.List;
@@ -27,8 +27,8 @@ public class ActionAST extends GrammarASTWithOptions implements RuleElementAST {
     public ActionAST(int type) { super(type); }
     public ActionAST(int type, Token t) { super(type, t); }
 
-	@Override
-	public ActionAST dupNode() { return new ActionAST(this); }
+//	@Override
+//	public ActionAST dupNode() { return new ActionAST(this); }
 
 	@Override
 	public Object visit(GrammarASTVisitor v) { return v.visit(this); }

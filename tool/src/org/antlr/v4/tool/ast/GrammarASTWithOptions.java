@@ -6,8 +6,10 @@
 
 package org.antlr.v4.tool.ast;
 
-import org.antlr.runtime.Token;
 import org.antlr.v4.misc.CharSupport;
+import org.antlr.v4.runtime.Parser;
+import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.tool.ErrorType;
 
 import java.util.Collections;
@@ -22,6 +24,9 @@ public abstract class GrammarASTWithOptions extends GrammarAST {
 		this.options = node.options;
 	}
 
+	public GrammarASTWithOptions(Parser p, ParseTree tree) {
+		super(p, tree);
+	}
 	public GrammarASTWithOptions(Token t) { super(t); }
     public GrammarASTWithOptions(int type) { super(type); }
     public GrammarASTWithOptions(int type, Token t) { super(type, t); }
@@ -63,8 +68,8 @@ public abstract class GrammarASTWithOptions extends GrammarAST {
 		return options==null ? 0 : options.size();
 	}
 
-	@Override
-	public abstract GrammarASTWithOptions dupNode();
+//	@Override
+//	public abstract GrammarASTWithOptions dupNode();
 
 
 	public Map<String, GrammarAST> getOptions() {

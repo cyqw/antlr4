@@ -6,7 +6,7 @@
 
 package org.antlr.v4.tool;
 
-import org.antlr.runtime.Token;
+import org.antlr.v4.runtime.Token;
 
 /** A problem with the symbols and/or meaning of a grammar such as rule
  *  redefinition. Any msg where we can point to a location in the grammar.

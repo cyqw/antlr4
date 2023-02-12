@@ -9,14 +9,9 @@ package org.antlr.v4.semantics;
 import org.antlr.v4.parse.GrammarTreeVisitor;
 import org.antlr.v4.tool.ErrorManager;
 import org.antlr.v4.tool.Grammar;
-import org.antlr.v4.tool.LabelElementPair;
 import org.antlr.v4.tool.Rule;
 import org.antlr.v4.tool.ast.ActionAST;
-import org.antlr.v4.tool.ast.AltAST;
 import org.antlr.v4.tool.ast.GrammarAST;
-import org.antlr.v4.tool.ast.GrammarASTWithOptions;
-import org.antlr.v4.tool.ast.PredAST;
-import org.antlr.v4.tool.ast.RuleAST;
 import org.antlr.v4.tool.ast.TerminalAST;
 
 import java.util.ArrayList;
@@ -61,78 +56,78 @@ public class SymbolCollector extends GrammarTreeVisitor {
 
 	public void process(GrammarAST ast) { visitGrammar(ast); }
 
-	@Override
-	public void globalNamedAction(GrammarAST scope, GrammarAST ID, ActionAST action) {
-		action.setScope(scope);
-		namedActions.add((GrammarAST)ID.getParent());
-		action.resolver = g;
-	}
+//	@Override
+//	public void globalNamedAction(GrammarAST scope, GrammarAST ID, ActionAST action) {
+//		action.setScope(scope);
+//		namedActions.add((GrammarAST)ID.getParent());
+//		action.resolver = g;
+//	}
 
-	@Override
-	public void defineToken(GrammarAST ID) {
-		terminals.add(ID);
-		tokenIDRefs.add(ID);
-		tokensDefs.add(ID);
-	}
+//	@Override
+//	public void defineToken(GrammarAST ID) {
+//		terminals.add(ID);
+//		tokenIDRefs.add(ID);
+//		tokensDefs.add(ID);
+//	}
 
-	@Override
-	public void defineChannel(GrammarAST ID) {
-		channelDefs.add(ID);
-	}
+//	@Override
+//	public void defineChannel(GrammarAST ID) {
+//		channelDefs.add(ID);
+//	}
 
-	@Override
-	public void discoverRule(RuleAST rule, GrammarAST ID,
-							 List<GrammarAST> modifiers, ActionAST arg,
-							 ActionAST returns, GrammarAST thrws,
-							 GrammarAST options, ActionAST locals,
-							 List<GrammarAST> actions,
-							 GrammarAST block)
-	{
-		currentRule = g.getRule(ID.getText());
-	}
+//	@Override
+//	public void discoverRule(RuleAST rule, GrammarAST ID,
+//							 List<GrammarAST> modifiers, ActionAST arg,
+//							 ActionAST returns, GrammarAST thrws,
+//							 GrammarAST options, ActionAST locals,
+//							 List<GrammarAST> actions,
+//							 GrammarAST block)
+//	{
+//		currentRule = g.getRule(ID.getText());
+//	}
 
-	@Override
-	public void discoverLexerRule(RuleAST rule, GrammarAST ID, List<GrammarAST> modifiers, GrammarAST options,
-								  GrammarAST block)
-	{
-		currentRule = g.getRule(ID.getText());
-	}
+//	@Override
+//	public void discoverLexerRule(RuleAST rule, GrammarAST ID, List<GrammarAST> modifiers, GrammarAST options,
+//								  GrammarAST block)
+//	{
+//		currentRule = g.getRule(ID.getText());
+//	}
 
-	@Override
-	public void discoverOuterAlt(AltAST alt) {
-		currentRule.alt[currentOuterAltNumber].ast = alt;
-	}
+//	@Override
+//	public void discoverOuterAlt(AltAST alt) {
+//		currentRule.alt[currentOuterAltNumber].ast = alt;
+//	}
 
-	@Override
-	public void actionInAlt(ActionAST action) {
-		currentRule.defineActionInAlt(currentOuterAltNumber, action);
-		action.resolver = currentRule.alt[currentOuterAltNumber];
-	}
+//	@Override
+//	public void actionInAlt(ActionAST action) {
+//		currentRule.defineActionInAlt(currentOuterAltNumber, action);
+//		action.resolver = currentRule.alt[currentOuterAltNumber];
+//	}
 
-	@Override
-	public void sempredInAlt(PredAST pred) {
-		currentRule.definePredicateInAlt(currentOuterAltNumber, pred);
-		pred.resolver = currentRule.alt[currentOuterAltNumber];
-	}
+//	@Override
+//	public void sempredInAlt(PredAST pred) {
+//		currentRule.definePredicateInAlt(currentOuterAltNumber, pred);
+//		pred.resolver = currentRule.alt[currentOuterAltNumber];
+//	}
 
-	@Override
-	public void ruleCatch(GrammarAST arg, ActionAST action) {
-		GrammarAST catchme = (GrammarAST)action.getParent();
-		currentRule.exceptions.add(catchme);
-		action.resolver = currentRule;
-	}
+//	@Override
+//	public void ruleCatch(GrammarAST arg, ActionAST action) {
+//		GrammarAST catchme = (GrammarAST)action.getParent();
+//		currentRule.exceptions.add(catchme);
+//		action.resolver = currentRule;
+//	}
 
-	@Override
-	public void finallyAction(ActionAST action) {
-		currentRule.finallyAction = action;
-		action.resolver = currentRule;
-	}
+//	@Override
+//	public void finallyAction(ActionAST action) {
+//		currentRule.finallyAction = action;
+//		action.resolver = currentRule;
+//	}
 
-	@Override
-	public void label(GrammarAST op, GrammarAST ID, GrammarAST element) {
-		LabelElementPair lp = new LabelElementPair(g, ID, element, op.getType());
-		currentRule.alt[currentOuterAltNumber].labelDefs.map(ID.getText(), lp);
-	}
+//	@Override
+//	public void label(GrammarAST op, GrammarAST ID, GrammarAST element) {
+//		LabelElementPair lp = new LabelElementPair(g, ID, element, op.getType());
+//		currentRule.alt[currentOuterAltNumber].labelDefs.map(ID.getText(), lp);
+//	}
 
 	@Override
 	public void stringRef(TerminalAST ref) {
@@ -161,25 +156,25 @@ public class SymbolCollector extends GrammarTreeVisitor {
     	}
 	}
 
-	@Override
-	public void grammarOption(GrammarAST ID, GrammarAST valueAST) {
-		setActionResolver(valueAST);
-	}
+//	@Override
+//	public void grammarOption(GrammarAST ID, GrammarAST valueAST) {
+//		setActionResolver(valueAST);
+//	}
 
-	@Override
-	public void ruleOption(GrammarAST ID, GrammarAST valueAST) {
-		setActionResolver(valueAST);
-	}
+//	@Override
+//	public void ruleOption(GrammarAST ID, GrammarAST valueAST) {
+//		setActionResolver(valueAST);
+//	}
 
-	@Override
-	public void blockOption(GrammarAST ID, GrammarAST valueAST) {
-		setActionResolver(valueAST);
-	}
+//	@Override
+//	public void blockOption(GrammarAST ID, GrammarAST valueAST) {
+//		setActionResolver(valueAST);
+//	}
 
-	@Override
-	public void elementOption(GrammarASTWithOptions t, GrammarAST ID, GrammarAST valueAST) {
-		setActionResolver(valueAST);
-	}
+//	@Override
+//	public void elementOption(GrammarASTWithOptions t, GrammarAST ID, GrammarAST valueAST) {
+//		setActionResolver(valueAST);
+//	}
 
 	/** In case of option id={...}, set resolve in case they use $foo */
 	private void setActionResolver(GrammarAST valueAST) {

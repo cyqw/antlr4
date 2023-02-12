@@ -6,9 +6,10 @@
 
 package org.antlr.v4.tool.ast;
 
-import org.antlr.runtime.Token;
-import org.antlr.runtime.TokenStream;
-import org.antlr.runtime.tree.Tree;
+import org.antlr.v4.runtime.Parser;
+import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.TokenStream;
+import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,7 +24,6 @@ public class GrammarRootAST extends GrammarASTWithOptions {
 	public boolean hasErrors;
 	/** Track stream used to create this tree */
 
-	public final TokenStream tokenStream;
 	public Map<String, String> cmdLineOptions; // -DsuperClass=T on command line
 	public String fileName;
 
@@ -31,7 +31,6 @@ public class GrammarRootAST extends GrammarASTWithOptions {
 		super(node);
 		this.grammarType = node.grammarType;
 		this.hasErrors = node.hasErrors;
-		this.tokenStream = node.tokenStream;
 	}
 
 	public GrammarRootAST(Token t, TokenStream tokenStream) {
@@ -40,7 +39,6 @@ public class GrammarRootAST extends GrammarASTWithOptions {
 			throw new NullPointerException("tokenStream");
 		}
 
-		this.tokenStream = tokenStream;
 	}
 
 	public GrammarRootAST(int type, Token t, TokenStream tokenStream) {
@@ -49,7 +47,6 @@ public class GrammarRootAST extends GrammarASTWithOptions {
 			throw new NullPointerException("tokenStream");
 		}
 
-		this.tokenStream = tokenStream;
 	}
 
 	public GrammarRootAST(int type, Token t, String text, TokenStream tokenStream) {
@@ -58,11 +55,14 @@ public class GrammarRootAST extends GrammarASTWithOptions {
 			throw new NullPointerException("tokenStream");
 		}
 
-		this.tokenStream = tokenStream;
     }
 
+	public GrammarRootAST(Parser p, ParseTree r) {
+		super(p, r);
+	}
+
 	public String getGrammarName() {
-		Tree t = getChild(0);
+		GrammarAST t = getChild(0);
 		if ( t!=null ) return t.getText();
 		return null;
 	}
@@ -82,6 +82,6 @@ public class GrammarRootAST extends GrammarASTWithOptions {
 	@Override
 	public Object visit(GrammarASTVisitor v) { return v.visit(this); }
 
-	@Override
-	public GrammarRootAST dupNode() { return new GrammarRootAST(this); }
+//	@Override
+//	public GrammarRootAST dupNode() { return new GrammarRootAST(this); }
 }

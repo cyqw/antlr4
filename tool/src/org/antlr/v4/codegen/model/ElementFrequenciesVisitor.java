@@ -6,13 +6,12 @@
 
 package org.antlr.v4.codegen.model;
 
-import org.antlr.runtime.tree.TreeNodeStream;
 import org.antlr.v4.misc.FrequencySet;
 import org.antlr.v4.misc.MutableInt;
 import org.antlr.v4.parse.GrammarTreeVisitor;
+import org.antlr.v4.tool.CommonTreeNodeStream;
 import org.antlr.v4.tool.ErrorManager;
 import org.antlr.v4.tool.ast.ActionAST;
-import org.antlr.v4.tool.ast.AltAST;
 import org.antlr.v4.tool.ast.GrammarAST;
 import org.antlr.v4.tool.ast.TerminalAST;
 
@@ -33,6 +32,13 @@ public class ElementFrequenciesVisitor extends GrammarTreeVisitor {
 
 	public ElementFrequenciesVisitor(TreeNodeStream input) {
 		super(input);
+		frequencies = new ArrayDeque<FrequencySet<String>>();
+		frequencies.push(new FrequencySet<String>());
+		minFrequencies = new ArrayDeque<FrequencySet<String>>();
+		minFrequencies.push(SENTINEL);
+	}
+
+	public ElementFrequenciesVisitor(CommonTreeNodeStream commonTreeNodeStream) {
 		frequencies = new ArrayDeque<FrequencySet<String>>();
 		frequencies.push(new FrequencySet<String>());
 		minFrequencies = new ArrayDeque<FrequencySet<String>>();
@@ -163,110 +169,113 @@ public class ElementFrequenciesVisitor extends GrammarTreeVisitor {
 	 * Parser rules
 	 */
 
-	@Override
-	protected void enterAlternative(AltAST tree) {
-		frequencies.push(new FrequencySet<String>());
-		minFrequencies.push(new FrequencySet<String>());
-	}
+//	@Override
+//	protected void enterAlternative(AltAST tree) {
+//		frequencies.push(new FrequencySet<String>());
+//		minFrequencies.push(new FrequencySet<String>());
+//	}
 
-	@Override
-	protected void exitAlternative(AltAST tree) {
-		frequencies.push(combineMax(frequencies.pop(), frequencies.pop()));
-		minFrequencies.push(combineMin(minFrequencies.pop(), minFrequencies.pop()));
-	}
+//	@Override
+//	protected void exitAlternative(AltAST tree) {
+//		frequencies.push(combineMax(frequencies.pop(), frequencies.pop()));
+//		minFrequencies.push(combineMin(minFrequencies.pop(), minFrequencies.pop()));
+//	}
 
-	@Override
-	protected void enterElement(GrammarAST tree) {
-		frequencies.push(new FrequencySet<String>());
-		minFrequencies.push(new FrequencySet<String>());
-	}
+//	@Override
+//	protected void enterElement(GrammarAST tree) {
+//		frequencies.push(new FrequencySet<String>());
+//		minFrequencies.push(new FrequencySet<String>());
+//	}
 
-	@Override
-	protected void exitElement(GrammarAST tree) {
-		frequencies.push(combineAndClip(frequencies.pop(), frequencies.pop(), 2));
-		minFrequencies.push(combineAndClip(minFrequencies.pop(), minFrequencies.pop(), 2));
-	}
+//	@Override
+//	protected void exitElement(GrammarAST tree) {
+//		frequencies.push(combineAndClip(frequencies.pop(), frequencies.pop(), 2));
+//		minFrequencies.push(combineAndClip(minFrequencies.pop(), minFrequencies.pop(), 2));
+//	}
 
-	@Override
-	protected void enterBlockSet(GrammarAST tree) {
-		frequencies.push(new FrequencySet<String>());
-		minFrequencies.push(new FrequencySet<String>());
-	}
+//	@Override
+//	protected void enterBlockSet(GrammarAST tree) {
+//		frequencies.push(new FrequencySet<String>());
+//		minFrequencies.push(new FrequencySet<String>());
+//	}
 
-	@Override
-	protected void exitBlockSet(GrammarAST tree) {
-		for (Map.Entry<String, MutableInt> entry : frequencies.peek().entrySet()) {
-			// This visitor counts a block set as a sequence of elements, not a
-			// sequence of alternatives of elements. Reset the count back to 1
-			// for all items when leaving the set to ensure duplicate entries in
-			// the set are treated as a maximum of one item.
-			entry.getValue().v = 1;
-		}
+//	@Override
+//	protected void exitBlockSet(GrammarAST tree) {
+//		for (Map.Entry<String, MutableInt> entry : frequencies.peek().entrySet()) {
+//			// This visitor counts a block set as a sequence of elements, not a
+//			// sequence of alternatives of elements. Reset the count back to 1
+//			// for all items when leaving the set to ensure duplicate entries in
+//			// the set are treated as a maximum of one item.
+//			entry.getValue().v = 1;
+//		}
+//
+//		if (minFrequencies.peek().size() > 1) {
+//			// Everything is optional
+//			minFrequencies.peek().clear();
+//		}
+//
+//		frequencies.push(combineAndClip(frequencies.pop(), frequencies.pop(), 2));
+//		minFrequencies.push(combineAndClip(minFrequencies.pop(), minFrequencies.pop(), 2));
+//	}
 
-		if (minFrequencies.peek().size() > 1) {
-			// Everything is optional
-			minFrequencies.peek().clear();
-		}
-
-		frequencies.push(combineAndClip(frequencies.pop(), frequencies.pop(), 2));
-		minFrequencies.push(combineAndClip(minFrequencies.pop(), minFrequencies.pop(), 2));
-	}
-
-	@Override
-	protected void exitSubrule(GrammarAST tree) {
-		if (tree.getType() == CLOSURE || tree.getType() == POSITIVE_CLOSURE) {
-			for (Map.Entry<String, MutableInt> entry : frequencies.peek().entrySet()) {
-				entry.getValue().v = 2;
-			}
-		}
-
-		if (tree.getType() == CLOSURE || tree.getType() == OPTIONAL) {
-			// Everything inside a closure is optional, so the minimum
-			// number of occurrences for all elements is 0.
-			minFrequencies.peek().clear();
-		}
-	}
+//	@Override
+//	protected void exitSubrule(GrammarAST tree) {
+//		if (tree.getType() == CLOSURE || tree.getType() == POSITIVE_CLOSURE) {
+//			for (Map.Entry<String, MutableInt> entry : frequencies.peek().entrySet()) {
+//				entry.getValue().v = 2;
+//			}
+//		}
+//
+//		if (tree.getType() == CLOSURE || tree.getType() == OPTIONAL) {
+//			// Everything inside a closure is optional, so the minimum
+//			// number of occurrences for all elements is 0.
+//			minFrequencies.peek().clear();
+//		}
+//	}
 
 	/*
 	 * Lexer rules
 	 */
 
-	@Override
-	protected void enterLexerAlternative(GrammarAST tree) {
-		frequencies.push(new FrequencySet<String>());
-		minFrequencies.push(new FrequencySet<String>());
-	}
+//	@Override
+//	protected void enterLexerAlternative(GrammarAST tree) {
+//		frequencies.push(new FrequencySet<String>());
+//		minFrequencies.push(new FrequencySet<String>());
+//	}
 
-	@Override
-	protected void exitLexerAlternative(GrammarAST tree) {
-		frequencies.push(combineMax(frequencies.pop(), frequencies.pop()));
-		minFrequencies.push(combineMin(minFrequencies.pop(), minFrequencies.pop()));
-	}
+//	@Override
+//	protected void exitLexerAlternative(GrammarAST tree) {
+//		frequencies.push(combineMax(frequencies.pop(), frequencies.pop()));
+//		minFrequencies.push(combineMin(minFrequencies.pop(), minFrequencies.pop()));
+//	}
 
-	@Override
-	protected void enterLexerElement(GrammarAST tree) {
-		frequencies.push(new FrequencySet<String>());
-		minFrequencies.push(new FrequencySet<String>());
-	}
+//	@Override
+//	protected void enterLexerElement(GrammarAST tree) {
+//		frequencies.push(new FrequencySet<String>());
+//		minFrequencies.push(new FrequencySet<String>());
+//	}
 
-	@Override
-	protected void exitLexerElement(GrammarAST tree) {
-		frequencies.push(combineAndClip(frequencies.pop(), frequencies.pop(), 2));
-		minFrequencies.push(combineAndClip(minFrequencies.pop(), minFrequencies.pop(), 2));
-	}
+//	@Override
+//	protected void exitLexerElement(GrammarAST tree) {
+//		frequencies.push(combineAndClip(frequencies.pop(), frequencies.pop(), 2));
+//		minFrequencies.push(combineAndClip(minFrequencies.pop(), minFrequencies.pop(), 2));
+//	}
 
-	@Override
-	protected void exitLexerSubrule(GrammarAST tree) {
-		if (tree.getType() == CLOSURE || tree.getType() == POSITIVE_CLOSURE) {
-			for (Map.Entry<String, MutableInt> entry : frequencies.peek().entrySet()) {
-				entry.getValue().v = 2;
-			}
-		}
+//	@Override
+//	protected void exitLexerSubrule(GrammarAST tree) {
+//		if (tree.getType() == CLOSURE || tree.getType() == POSITIVE_CLOSURE) {
+//			for (Map.Entry<String, MutableInt> entry : frequencies.peek().entrySet()) {
+//				entry.getValue().v = 2;
+//			}
+//		}
+//
+//		if (tree.getType() == CLOSURE) {
+//			// Everything inside a closure is optional, so the minimum
+//			// number of occurrences for all elements is 0.
+//			minFrequencies.peek().clear();
+//		}
+//	}
 
-		if (tree.getType() == CLOSURE) {
-			// Everything inside a closure is optional, so the minimum
-			// number of occurrences for all elements is 0.
-			minFrequencies.peek().clear();
-		}
+	public void outerAlternative() {
 	}
 }

@@ -6,7 +6,6 @@
 
 package org.antlr.v4.codegen;
 
-import org.antlr.runtime.tree.CommonTreeNodeStream;
 import org.antlr.v4.analysis.LeftRecursiveRuleAltInfo;
 import org.antlr.v4.codegen.model.Action;
 import org.antlr.v4.codegen.model.AltBlock;
@@ -33,7 +32,9 @@ import org.antlr.v4.codegen.model.decl.CodeBlock;
 import org.antlr.v4.misc.Utils;
 import org.antlr.v4.parse.ANTLRParser;
 import org.antlr.v4.parse.GrammarASTAdaptor;
+import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.tool.Alternative;
+import org.antlr.v4.tool.CommonTreeNodeStream;
 import org.antlr.v4.tool.ErrorType;
 import org.antlr.v4.tool.Grammar;
 import org.antlr.v4.tool.LeftRecursiveRule;
@@ -281,7 +282,7 @@ public class OutputModelController {
 			function.code = DefaultOutputModelFactory.list(walker.block(null, null));
 			function.hasLookaheadBlock = walker.hasLookaheadBlock;
 		}
-		catch (org.antlr.runtime.RecognitionException e){
+		catch (RecognitionException e){
 			e.printStackTrace(System.err);
 		}
 

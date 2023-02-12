@@ -6,9 +6,10 @@
 
 package org.antlr.v4.semantics;
 
-import org.antlr.runtime.ANTLRStringStream;
-import org.antlr.runtime.Token;
 import org.antlr.v4.parse.ActionSplitter;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.tool.Alternative;
 import org.antlr.v4.tool.ErrorManager;
 import org.antlr.v4.tool.Grammar;
@@ -41,18 +42,14 @@ public class ActionSniffer extends BlankActionSplitterListener {
 
 	public void examineAction() {
 		//System.out.println("examine "+actionToken);
-		ANTLRStringStream in = new ANTLRStringStream(actionToken.getText());
-		in.setLine(actionToken.getLine());
-		in.setCharPositionInLine(actionToken.getCharPositionInLine());
+		CharStream in = CharStreams.fromString(actionToken.getText());
 		ActionSplitter splitter = new ActionSplitter(in, this);
 		// forces eval, triggers listener methods
 		node.chunks = splitter.getActionTokens();
 	}
 
 	public void processNested(Token actionToken) {
-		ANTLRStringStream in = new ANTLRStringStream(actionToken.getText());
-		in.setLine(actionToken.getLine());
-		in.setCharPositionInLine(actionToken.getCharPositionInLine());
+		CharStream in = CharStreams.fromString(actionToken.getText());
 		ActionSplitter splitter = new ActionSplitter(in, this);
 		// forces eval, triggers listener methods
 		splitter.getActionTokens();

@@ -7,7 +7,7 @@
 package org.antlr.v4.test.tool;
 
 import org.antlr.runtime.ANTLRStringStream;
-import org.antlr.runtime.CharStream;
+import org.antlr.v4.runtime.CharStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.Parser;
 import org.antlr.runtime.RuleReturnScope;

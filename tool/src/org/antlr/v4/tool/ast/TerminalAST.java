@@ -6,7 +6,7 @@
 
 package org.antlr.v4.tool.ast;
 
-import org.antlr.runtime.Token;
+import org.antlr.v4.runtime.Token;
 
 public class TerminalAST extends GrammarASTWithOptions implements RuleElementAST {
 
@@ -18,8 +18,8 @@ public class TerminalAST extends GrammarASTWithOptions implements RuleElementAST
     public TerminalAST(int type) { super(type); }
     public TerminalAST(int type, Token t) { super(type, t); }
 
-	@Override
-	public TerminalAST dupNode() { return new TerminalAST(this); }
+//	@Override
+//	public TerminalAST dupNode() { return new TerminalAST(this); }
 
 	@Override
 	public Object visit(GrammarASTVisitor v) { return v.visit(this); }

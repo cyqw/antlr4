@@ -6,15 +6,15 @@
 
 package org.antlr.v4.tool.ast;
 
-import org.antlr.runtime.Token;
-import org.antlr.runtime.TokenStream;
-import org.antlr.runtime.tree.CommonErrorNode;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.TokenStream;
 
 /** A node representing erroneous token range in token stream */
 public class GrammarASTErrorNode extends GrammarAST {
     CommonErrorNode delegate;
     public GrammarASTErrorNode(TokenStream input, Token start, Token stop,
-                               org.antlr.runtime.RecognitionException e)
+                               RecognitionException e)
     {
         delegate = new CommonErrorNode(input,start,stop,e);
     }

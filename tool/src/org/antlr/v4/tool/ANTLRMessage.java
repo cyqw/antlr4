@@ -6,7 +6,8 @@
 
 package org.antlr.v4.tool;
 
-import org.antlr.runtime.Token;
+import org.antlr.runtime.TokenConstant;
+import org.antlr.v4.runtime.Token;
 import org.stringtemplate.v4.ST;
 
 import java.util.Arrays;
@@ -33,7 +34,7 @@ public class ANTLRMessage {
     public Token offendingToken;
 
 	public ANTLRMessage(ErrorType errorType) {
-        this(errorType, (Throwable)null, Token.INVALID_TOKEN);
+        this(errorType, (Throwable)null, TokenConstant.INVALID_TOKEN);
     }
 
     public ANTLRMessage(ErrorType errorType, Token offendingToken, Object... args) {

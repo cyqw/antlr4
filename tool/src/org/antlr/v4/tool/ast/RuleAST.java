@@ -6,9 +6,8 @@
 
 package org.antlr.v4.tool.ast;
 
-import org.antlr.runtime.Token;
-import org.antlr.runtime.tree.Tree;
 import org.antlr.v4.parse.ANTLRParser;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.tool.Grammar;
 
 public class RuleAST extends GrammarASTWithOptions {
@@ -30,14 +29,14 @@ public class RuleAST extends GrammarASTWithOptions {
 		return null;
 	}
 
-	@Override
-	public RuleAST dupNode() { return new RuleAST(this); }
+//	@Override
+//	public RuleAST dupNode() { return new RuleAST(this); }
 
 	public ActionAST getLexerAction() {
-		Tree blk = getFirstChildWithType(ANTLRParser.BLOCK);
+		GrammarAST blk = getFirstChildWithType(ANTLRParser.BLOCK);
 		if ( blk.getChildCount()==1 ) {
-			Tree onlyAlt = blk.getChild(0);
-			Tree lastChild = onlyAlt.getChild(onlyAlt.getChildCount()-1);
+			GrammarAST onlyAlt = blk.getChild(0);
+			GrammarAST lastChild = onlyAlt.getChild(onlyAlt.getChildCount()-1);
 			if ( lastChild.getType()==ANTLRParser.ACTION ) {
 				return (ActionAST)lastChild;
 			}

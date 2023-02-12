@@ -6,8 +6,9 @@
 
 package org.antlr.v4.semantics;
 
-import org.antlr.runtime.ANTLRStringStream;
-import org.antlr.runtime.Token;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.parse.ANTLRParser;
 import org.antlr.v4.parse.ActionSplitter;
 import org.antlr.v4.parse.ActionSplitterListener;
@@ -41,9 +42,7 @@ public class UseDefAnalyzer {
 	}
 
 	public static boolean actionIsContextDependent(ActionAST actionAST) {
-		ANTLRStringStream in = new ANTLRStringStream(actionAST.token.getText());
-		in.setLine(actionAST.token.getLine());
-		in.setCharPositionInLine(actionAST.token.getCharPositionInLine());
+		CharStream in = CharStreams.fromString(actionAST.token.getText());
 		final boolean[] dependent = new boolean[] {false}; // can't be simple bool with anon class
 		ActionSplitterListener listener = new BlankActionSplitterListener() {
 			@Override

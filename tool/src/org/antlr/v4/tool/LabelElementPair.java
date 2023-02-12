@@ -6,12 +6,14 @@
 
 package org.antlr.v4.tool;
 
-import org.antlr.runtime.BitSet;
 import org.antlr.v4.parse.ANTLRParser;
 import org.antlr.v4.tool.ast.GrammarAST;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class LabelElementPair {
-    public static final BitSet tokenTypeForTokens = new BitSet();
+    public static final Set tokenTypeForTokens = new HashSet();
     static {
         tokenTypeForTokens.add(ANTLRParser.TOKEN_REF);
         tokenTypeForTokens.add(ANTLRParser.STRING_LITERAL);

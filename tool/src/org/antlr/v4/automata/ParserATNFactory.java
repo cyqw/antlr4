@@ -7,15 +7,13 @@
 package org.antlr.v4.automata;
 
 
-import org.antlr.runtime.RecognitionException;
-import org.antlr.runtime.Token;
-import org.antlr.runtime.tree.CommonTreeNodeStream;
-import org.antlr.runtime.tree.Tree;
 import org.antlr.v4.analysis.LeftRecursiveRuleTransformer;
 import org.antlr.v4.misc.CharSupport;
 import org.antlr.v4.parse.ANTLRParser;
 import org.antlr.v4.parse.ATNBuilder;
 import org.antlr.v4.parse.GrammarASTAdaptor;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.atn.ATN;
 import org.antlr.v4.runtime.atn.ATNState;
 import org.antlr.v4.runtime.atn.ATNType;
@@ -46,6 +44,7 @@ import org.antlr.v4.runtime.atn.WildcardTransition;
 import org.antlr.v4.runtime.misc.IntervalSet;
 import org.antlr.v4.runtime.misc.Triple;
 import org.antlr.v4.semantics.UseDefAnalyzer;
+import org.antlr.v4.tool.CommonTreeNodeStream;
 import org.antlr.v4.tool.ErrorManager;
 import org.antlr.v4.tool.ErrorType;
 import org.antlr.v4.tool.Grammar;
@@ -772,7 +771,7 @@ public class ParserATNFactory implements ATNFactory {
 			if ( !(alt instanceof AltAST) ) continue;
 			AltAST altAST = (AltAST)alt;
 			if ( altAST.getChildCount()==1 || (altAST.getChildCount() == 2 && altAST.getChild(0).getType() == ANTLRParser.ELEMENT_OPTIONS) ) {
-				Tree e = altAST.getChild(altAST.getChildCount() - 1);
+				GrammarAST e = altAST.getChild(altAST.getChildCount() - 1);
 				if ( e.getType()==ANTLRParser.WILDCARD ) {
 					return true;
 				}

@@ -1,6 +1,6 @@
 package org.antlr.v4.gui;
 
-import org.antlr.runtime.RecognitionException;
+import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.Tool;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.atn.DecisionInfo;

@@ -6,7 +6,6 @@
 
 package org.antlr.mojo.antlr4;
 
-import org.antlr.runtime.tree.Tree;
 import org.antlr.v4.Tool;
 import org.antlr.v4.misc.Graph;
 import org.antlr.v4.parse.ANTLRParser;
@@ -216,42 +215,42 @@ class GrammarDependencies {
             return;
 
         for (GrammarAST importDecl : grammar.getAllChildrenWithType(ANTLRParser.IMPORT)) {
-            for (Tree id: importDecl.getAllChildrenWithType(ANTLRParser.ID)) {
-                // missing id is not valid, but we don't want to prevent the root cause from
-                // being reported by the ANTLR tool
-                if (id != null) {
-                    String grammarPath = getRelativePath(grammarFile);
-
-                    graph.addEdge(id.getText() + ".g4", grammarPath);
-                }
-            }
+//            for (Tree id: importDecl.getAllChildrenWithType(ANTLRParser.ID)) {
+//                // missing id is not valid, but we don't want to prevent the root cause from
+//                // being reported by the ANTLR tool
+//                if (id != null) {
+//                    String grammarPath = getRelativePath(grammarFile);
+//
+//                    graph.addEdge(id.getText() + ".g4", grammarPath);
+//                }
+//            }
         }
 
         for (GrammarAST options : grammar.getAllChildrenWithType(ANTLRParser.OPTIONS)) {
             for (int i = 0, count = options.getChildCount(); i < count; i++) {
-                Tree option = options.getChild(i);
-
-                if (option.getType() == ANTLRParser.ASSIGN) {
-                    String key = option.getChild(0).getText();
-                    String value = option.getChild(1).getText();
-
-                    if ("tokenVocab".equals(key)) {
-                        String name = stripQuotes(value);
-                        // the grammar name may be qualified, but we resolve the path anyway
-                        String grammarName = stripPath(name);
-                        String grammarPath = MojoUtils.findSourceSubdir(sourceDirectory,
-                                grammarFile);
-                        File depGrammarFile = resolve(grammarName, grammarPath);
-
-                        // if a package has been given, we use it instead of the file directory path
-                        // (files probably reside in the root directory anyway with such a configuration )
-                        if (packageName != null)
-                            grammarPath = packageName;
-
-                        graph.addEdge(getRelativePath(depGrammarFile),
-                            grammarPath + grammarFile.getName());
-                    }
-                }
+//                Tree option = options.getChild(i);
+//
+//                if (option.getType() == ANTLRParser.ASSIGN) {
+//                    String key = option.getChild(0).getText();
+//                    String value = option.getChild(1).getText();
+//
+//                    if ("tokenVocab".equals(key)) {
+//                        String name = stripQuotes(value);
+//                        // the grammar name may be qualified, but we resolve the path anyway
+//                        String grammarName = stripPath(name);
+//                        String grammarPath = MojoUtils.findSourceSubdir(sourceDirectory,
+//                                grammarFile);
+//                        File depGrammarFile = resolve(grammarName, grammarPath);
+//
+//                        // if a package has been given, we use it instead of the file directory path
+//                        // (files probably reside in the root directory anyway with such a configuration )
+//                        if (packageName != null)
+//                            grammarPath = packageName;
+//
+//                        graph.addEdge(getRelativePath(depGrammarFile),
+//                            grammarPath + grammarFile.getName());
+//                    }
+//                }
             }
         }
     }

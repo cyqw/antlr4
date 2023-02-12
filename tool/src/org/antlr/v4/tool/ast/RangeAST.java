@@ -6,7 +6,7 @@
 
 package org.antlr.v4.tool.ast;
 
-import org.antlr.runtime.Token;
+import org.antlr.v4.runtime.Token;
 
 public class RangeAST extends GrammarAST implements RuleElementAST {
 
@@ -16,10 +16,10 @@ public class RangeAST extends GrammarAST implements RuleElementAST {
 
 	public RangeAST(Token t) { super(t); }
 
-	@Override
-	public RangeAST dupNode() {
-		return new RangeAST(this);
-	}
+//	@Override
+//	public RangeAST dupNode() {
+//		return new RangeAST(this);
+//	}
 
 	@Override
 	public Object visit(GrammarASTVisitor v) { return v.visit(this); }

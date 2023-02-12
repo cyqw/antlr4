@@ -6,8 +6,8 @@
 
 package org.antlr.v4.tool;
 
-import org.antlr.runtime.RecognitionException;
-import org.antlr.runtime.Token;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.Token;
 
 /** A problem with the syntax of your antlr grammar such as
  *  "The '{' came as a complete surprise to me at this point in your program"

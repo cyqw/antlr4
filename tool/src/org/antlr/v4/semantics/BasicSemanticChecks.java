@@ -6,23 +6,15 @@
 
 package org.antlr.v4.semantics;
 
-import org.antlr.runtime.Token;
-import org.antlr.runtime.tree.CommonTree;
-import org.antlr.runtime.tree.Tree;
 import org.antlr.v4.misc.Utils;
 import org.antlr.v4.parse.ANTLRParser;
 import org.antlr.v4.parse.GrammarTreeVisitor;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.tool.ErrorManager;
 import org.antlr.v4.tool.ErrorType;
 import org.antlr.v4.tool.Grammar;
-import org.antlr.v4.tool.Rule;
 import org.antlr.v4.tool.ast.ActionAST;
-import org.antlr.v4.tool.ast.AltAST;
-import org.antlr.v4.tool.ast.BlockAST;
 import org.antlr.v4.tool.ast.GrammarAST;
-import org.antlr.v4.tool.ast.GrammarASTWithOptions;
-import org.antlr.v4.tool.ast.GrammarRootAST;
-import org.antlr.v4.tool.ast.RuleAST;
 import org.antlr.v4.tool.ast.RuleRefAST;
 import org.antlr.v4.tool.ast.TerminalAST;
 import org.stringtemplate.v4.misc.MultiMap;
@@ -119,12 +111,14 @@ public class BasicSemanticChecks extends GrammarTreeVisitor {
 
 	// Routines to route visitor traffic to the checking routines
 
+/*
 	@Override
 	public void discoverGrammar(GrammarRootAST root, GrammarAST ID) {
 		checkGrammarName(ID.token);
 	}
+*/
 
-	@Override
+	/*@Override
 	public void finishPrequels(GrammarAST firstPrequel) {
 		if ( firstPrequel==null ) return;
 		GrammarAST parent = (GrammarAST)firstPrequel.parent;
@@ -132,171 +126,171 @@ public class BasicSemanticChecks extends GrammarTreeVisitor {
 		List<GrammarAST> imports = parent.getAllChildrenWithType(IMPORT);
 		List<GrammarAST> tokens = parent.getAllChildrenWithType(TOKENS_SPEC);
 		checkNumPrequels(options, imports, tokens);
-	}
+	}*/
 
-	@Override
-	public void importGrammar(GrammarAST label, GrammarAST ID) {
-		checkImport(ID.token);
-	}
+//	@Override
+//	public void importGrammar(GrammarAST label, GrammarAST ID) {
+//		checkImport(ID.token);
+//	}
 
-	@Override
-	public void discoverRules(GrammarAST rules) {
-		checkNumRules(rules);
-	}
+//	@Override
+//	public void discoverRules(GrammarAST rules) {
+//		checkNumRules(rules);
+//	}
 
-	@Override
-	protected void enterMode(GrammarAST tree) {
-		nonFragmentRuleCount = 0;
-	}
+//	@Override
+//	protected void enterMode(GrammarAST tree) {
+//		nonFragmentRuleCount = 0;
+//	}
 
-	@Override
-	protected void exitMode(GrammarAST tree) {
-		if (nonFragmentRuleCount == 0) {
-			Token token = tree.getToken();
-			String name = "?";
-			if (tree.getChildCount() > 0) {
-				name = tree.getChild(0).getText();
-				if (name == null || name.isEmpty()) {
-					name = "?";
-				}
+//	@Override
+//	protected void exitMode(GrammarAST tree) {
+//		if (nonFragmentRuleCount == 0) {
+//			Token token = tree.getToken();
+//			String name = "?";
+//			if (tree.getChildCount() > 0) {
+//				name = tree.getChild(0).getText();
+//				if (name == null || name.isEmpty()) {
+//					name = "?";
+//				}
+//
+//				token = ((GrammarAST)tree.getChild(0)).getToken();
+//			}
+//
+//			g.tool.errMgr.grammarError(ErrorType.MODE_WITHOUT_RULES, g.fileName, token, name, g);
+//		}
+//	}
 
-				token = ((GrammarAST)tree.getChild(0)).getToken();
-			}
+//	@Override
+//	public void modeDef(GrammarAST m, GrammarAST ID) {
+//		if ( !g.isLexer() ) {
+//			g.tool.errMgr.grammarError(ErrorType.MODE_NOT_IN_LEXER, g.fileName,
+//									   ID.token, ID.token.getText(), g);
+//		}
+//	}
 
-			g.tool.errMgr.grammarError(ErrorType.MODE_WITHOUT_RULES, g.fileName, token, name, g);
-		}
-	}
+//	@Override
+//	public void discoverRule(RuleAST rule, GrammarAST ID,
+//							 List<GrammarAST> modifiers,
+//							 ActionAST arg, ActionAST returns,
+//							 GrammarAST thrws, GrammarAST options,
+//							 ActionAST locals,
+//							 List<GrammarAST> actions, GrammarAST block)
+//	{
+//		// TODO: chk that all or no alts have "# label"
+//		checkInvalidRuleDef(ID.token);
+//	}
 
-	@Override
-	public void modeDef(GrammarAST m, GrammarAST ID) {
-		if ( !g.isLexer() ) {
-			g.tool.errMgr.grammarError(ErrorType.MODE_NOT_IN_LEXER, g.fileName,
-									   ID.token, ID.token.getText(), g);
-		}
-	}
+//	@Override
+//	public void discoverLexerRule(RuleAST rule, GrammarAST ID, List<GrammarAST> modifiers, GrammarAST options,
+//								  GrammarAST block)
+//	{
+//		checkInvalidRuleDef(ID.token);
+//
+//		if (modifiers != null) {
+//			for (GrammarAST tree : modifiers) {
+//				if (tree.getType() == ANTLRParser.FRAGMENT) {
+//					inFragmentRule = true;
+//				}
+//			}
+//		}
+//
+//		if (!inFragmentRule) {
+//			nonFragmentRuleCount++;
+//		}
+//	}
 
-	@Override
-	public void discoverRule(RuleAST rule, GrammarAST ID,
-							 List<GrammarAST> modifiers,
-							 ActionAST arg, ActionAST returns,
-							 GrammarAST thrws, GrammarAST options,
-							 ActionAST locals,
-							 List<GrammarAST> actions, GrammarAST block)
-	{
-		// TODO: chk that all or no alts have "# label"
-		checkInvalidRuleDef(ID.token);
-	}
-
-	@Override
-	public void discoverLexerRule(RuleAST rule, GrammarAST ID, List<GrammarAST> modifiers, GrammarAST options,
-								  GrammarAST block)
-	{
-		checkInvalidRuleDef(ID.token);
-
-		if (modifiers != null) {
-			for (GrammarAST tree : modifiers) {
-				if (tree.getType() == ANTLRParser.FRAGMENT) {
-					inFragmentRule = true;
-				}
-			}
-		}
-
-		if (!inFragmentRule) {
-			nonFragmentRuleCount++;
-		}
-	}
-
-	@Override
-	protected void exitLexerRule(GrammarAST tree) {
-		inFragmentRule = false;
-	}
+//	@Override
+//	protected void exitLexerRule(GrammarAST tree) {
+//		inFragmentRule = false;
+//	}
 
 	@Override
 	public void ruleRef(GrammarAST ref, ActionAST arg) {
 		checkInvalidRuleRef(ref.token);
 	}
 
-	@Override
-	public void grammarOption(GrammarAST ID, GrammarAST valueAST) {
-		checkOptions(g.ast, ID.token, valueAST);
-	}
+//	@Override
+//	public void grammarOption(GrammarAST ID, GrammarAST valueAST) {
+//		checkOptions(g.ast, ID.token, valueAST);
+//	}
 
-	@Override
-	public void ruleOption(GrammarAST ID, GrammarAST valueAST) {
-		checkOptions((GrammarAST)ID.getAncestor(RULE), ID.token, valueAST);
-	}
+//	@Override
+//	public void ruleOption(GrammarAST ID, GrammarAST valueAST) {
+//		checkOptions((GrammarAST)ID.getAncestor(RULE), ID.token, valueAST);
+//	}
 
-	@Override
-	public void blockOption(GrammarAST ID, GrammarAST valueAST) {
-		checkOptions((GrammarAST)ID.getAncestor(BLOCK), ID.token, valueAST);
-	}
+//	@Override
+//	public void blockOption(GrammarAST ID, GrammarAST valueAST) {
+//		checkOptions((GrammarAST)ID.getAncestor(BLOCK), ID.token, valueAST);
+//	}
 
-	@Override
-	public void defineToken(GrammarAST ID) {
-		checkTokenDefinition(ID.token);
-	}
+//	@Override
+//	public void defineToken(GrammarAST ID) {
+//		checkTokenDefinition(ID.token);
+//	}
 
-	@Override
-	protected void enterChannelsSpec(GrammarAST tree) {
-		ErrorType errorType = g.isParser()
-				? ErrorType.CHANNELS_BLOCK_IN_PARSER_GRAMMAR
-				: g.isCombined()
-				? ErrorType.CHANNELS_BLOCK_IN_COMBINED_GRAMMAR
-				: null;
-		if (errorType != null) {
-			g.tool.errMgr.grammarError(errorType, g.fileName, tree.token);
-		}
-	}
+//	@Override
+//	protected void enterChannelsSpec(GrammarAST tree) {
+//		ErrorType errorType = g.isParser()
+//				? ErrorType.CHANNELS_BLOCK_IN_PARSER_GRAMMAR
+//				: g.isCombined()
+//				? ErrorType.CHANNELS_BLOCK_IN_COMBINED_GRAMMAR
+//				: null;
+//		if (errorType != null) {
+//			g.tool.errMgr.grammarError(errorType, g.fileName, tree.token);
+//		}
+//	}
 
-	@Override
-	public void defineChannel(GrammarAST ID) {
-		checkChannelDefinition(ID.token);
-	}
+//	@Override
+//	public void defineChannel(GrammarAST ID) {
+//		checkChannelDefinition(ID.token);
+//	}
 
-	@Override
-	public void elementOption(GrammarASTWithOptions elem, GrammarAST ID, GrammarAST valueAST) {
-		checkElementOptions(elem, ID, valueAST);
-	}
+//	@Override
+//	public void elementOption(GrammarASTWithOptions elem, GrammarAST ID, GrammarAST valueAST) {
+//		checkElementOptions(elem, ID, valueAST);
+//	}
 
-	@Override
-	public void finishRule(RuleAST rule, GrammarAST ID, GrammarAST block) {
-		if ( rule.isLexerRule() ) return;
-		BlockAST blk = (BlockAST)rule.getFirstChildWithType(BLOCK);
-		int nalts = blk.getChildCount();
-		GrammarAST idAST = (GrammarAST)rule.getChild(0);
-		for (int i=0; i< nalts; i++) {
-			AltAST altAST = (AltAST)blk.getChild(i);
-			if ( altAST.altLabel!=null ) {
-				String altLabel = altAST.altLabel.getText();
-				// first check that label doesn't conflict with a rule
-				// label X or x can't be rule x.
-				Rule r = ruleCollector.rules.get(Utils.decapitalize(altLabel));
-				if ( r!=null ) {
-					g.tool.errMgr.grammarError(ErrorType.ALT_LABEL_CONFLICTS_WITH_RULE,
-											   g.fileName, altAST.altLabel.token,
-											   altLabel,
-											   r.name);
-				}
-				// Now verify that label X or x doesn't conflict with label
-				// in another rule. altLabelToRuleName has both X and x mapped.
-				String prevRuleForLabel = ruleCollector.altLabelToRuleName.get(altLabel);
-				if ( prevRuleForLabel!=null && !prevRuleForLabel.equals(rule.getRuleName()) ) {
-					g.tool.errMgr.grammarError(ErrorType.ALT_LABEL_REDEF,
-											   g.fileName, altAST.altLabel.token,
-											   altLabel,
-											   rule.getRuleName(),
-											   prevRuleForLabel);
-				}
-			}
-		}
-		List<GrammarAST> altLabels = ruleCollector.ruleToAltLabels.get(rule.getRuleName());
-		int numAltLabels = 0;
-		if ( altLabels!=null ) numAltLabels = altLabels.size();
-		if ( numAltLabels>0 && nalts != numAltLabels ) {
-			g.tool.errMgr.grammarError(ErrorType.RULE_WITH_TOO_FEW_ALT_LABELS,
-									   g.fileName, idAST.token, rule.getRuleName());
-		}
-	}
+//	@Override
+//	public void finishRule(RuleAST rule, GrammarAST ID, GrammarAST block) {
+//		if ( rule.isLexerRule() ) return;
+//		BlockAST blk = (BlockAST)rule.getFirstChildWithType(BLOCK);
+//		int nalts = blk.getChildCount();
+//		GrammarAST idAST = (GrammarAST)rule.getChild(0);
+//		for (int i=0; i< nalts; i++) {
+//			AltAST altAST = (AltAST)blk.getChild(i);
+//			if ( altAST.altLabel!=null ) {
+//				String altLabel = altAST.altLabel.getText();
+//				// first check that label doesn't conflict with a rule
+//				// label X or x can't be rule x.
+//				Rule r = ruleCollector.rules.get(Utils.decapitalize(altLabel));
+//				if ( r!=null ) {
+//					g.tool.errMgr.grammarError(ErrorType.ALT_LABEL_CONFLICTS_WITH_RULE,
+//											   g.fileName, altAST.altLabel.token,
+//											   altLabel,
+//											   r.name);
+//				}
+//				// Now verify that label X or x doesn't conflict with label
+//				// in another rule. altLabelToRuleName has both X and x mapped.
+//				String prevRuleForLabel = ruleCollector.altLabelToRuleName.get(altLabel);
+//				if ( prevRuleForLabel!=null && !prevRuleForLabel.equals(rule.getRuleName()) ) {
+//					g.tool.errMgr.grammarError(ErrorType.ALT_LABEL_REDEF,
+//											   g.fileName, altAST.altLabel.token,
+//											   altLabel,
+//											   rule.getRuleName(),
+//											   prevRuleForLabel);
+//				}
+//			}
+//		}
+//		List<GrammarAST> altLabels = ruleCollector.ruleToAltLabels.get(rule.getRuleName());
+//		int numAltLabels = 0;
+//		if ( altLabels!=null ) numAltLabels = altLabels.size();
+//		if ( numAltLabels>0 && nalts != numAltLabels ) {
+//			g.tool.errMgr.grammarError(ErrorType.RULE_WITH_TOO_FEW_ALT_LABELS,
+//									   g.fileName, idAST.token, rule.getRuleName());
+//		}
+//	}
 
 	// Routines to do the actual work of checking issues with a grammar.
 	// They are triggered by the visitor methods above.
@@ -386,29 +380,29 @@ public class BasicSemanticChecks extends GrammarTreeVisitor {
 	void checkChannelDefinition(Token tokenID) {
 	}
 
-	@Override
-	protected void enterLexerElement(GrammarAST tree) {
-	}
+//	@Override
+//	protected void enterLexerElement(GrammarAST tree) {
+//	}
 
-	@Override
-	protected void enterLexerCommand(GrammarAST tree) {
-		checkElementIsOuterMostInSingleAlt(tree);
+//	@Override
+//	protected void enterLexerCommand(GrammarAST tree) {
+//		checkElementIsOuterMostInSingleAlt(tree);
+//
+//		if (inFragmentRule) {
+//			String fileName = tree.token.getInputStream().getSourceName();
+//			String ruleName = currentRuleName;
+//			g.tool.errMgr.grammarError(ErrorType.FRAGMENT_ACTION_IGNORED, fileName, tree.token, ruleName);
+//		}
+//	}
 
-		if (inFragmentRule) {
-			String fileName = tree.token.getInputStream().getSourceName();
-			String ruleName = currentRuleName;
-			g.tool.errMgr.grammarError(ErrorType.FRAGMENT_ACTION_IGNORED, fileName, tree.token, ruleName);
-		}
-	}
-
-	@Override
-	public void actionInAlt(ActionAST action) {
-		if (inFragmentRule) {
-			String fileName = action.token.getInputStream().getSourceName();
-			String ruleName = currentRuleName;
-			g.tool.errMgr.grammarError(ErrorType.FRAGMENT_ACTION_IGNORED, fileName, action.token, ruleName);
-		}
-	}
+//	@Override
+//	public void actionInAlt(ActionAST action) {
+//		if (inFragmentRule) {
+//			String fileName = action.token.getInputStream().getSourceName();
+//			String ruleName = currentRuleName;
+//			g.tool.errMgr.grammarError(ErrorType.FRAGMENT_ACTION_IGNORED, fileName, action.token, ruleName);
+//		}
+//	}
 
 	/**
 	 Make sure that action is last element in outer alt; here action,
@@ -417,52 +411,52 @@ public class BasicSemanticChecks extends GrammarTreeVisitor {
 	 (RULE B (BLOCK (ALT (BLOCK (ALT {a2} 'x') (ALT 'y')) {a3})))
 	 (RULE C (BLOCK (ALT 'd' {z}) (ALT 'e' {zz})))
 	 */
-	protected void checkElementIsOuterMostInSingleAlt(GrammarAST tree) {
-		CommonTree alt = tree.parent;
-		CommonTree blk = alt.parent;
-		boolean outerMostAlt = blk.parent.getType() == RULE;
-		Tree rule = tree.getAncestor(RULE);
-		String fileName = tree.getToken().getInputStream().getSourceName();
-		if ( !outerMostAlt || blk.getChildCount()>1 )
-		{
-			ErrorType e = ErrorType.LEXER_COMMAND_PLACEMENT_ISSUE;
-			g.tool.errMgr.grammarError(e,
-									   fileName,
-									   tree.getToken(),
-									   rule.getChild(0).getText());
+//	protected void checkElementIsOuterMostInSingleAlt(GrammarAST tree) {
+//		CommonTree alt = tree.parent;
+//		CommonTree blk = alt.parent;
+//		boolean outerMostAlt = blk.parent.getType() == RULE;
+//		Tree rule = tree.getAncestor(RULE);
+//		String fileName = tree.getToken().getInputStream().getSourceName();
+//		if ( !outerMostAlt || blk.getChildCount()>1 )
+//		{
+//			ErrorType e = ErrorType.LEXER_COMMAND_PLACEMENT_ISSUE;
+//			g.tool.errMgr.grammarError(e,
+//									   fileName,
+//									   tree.getToken(),
+//									   rule.getChild(0).getText());
+//
+//		}
+//	}
 
-		}
-	}
+//	@Override
+//	public void label(GrammarAST op, GrammarAST ID, GrammarAST element) {
+//		switch (element.getType()) {
+//		// token atoms
+//		case TOKEN_REF:
+//		case STRING_LITERAL:
+//		case RANGE:
+//		// token sets
+//		case SET:
+//		case NOT:
+//		// rule atoms
+//		case RULE_REF:
+//		case WILDCARD:
+//			return;
+//
+//		default:
+//			String fileName = ID.token.getInputStream().getSourceName();
+//			g.tool.errMgr.grammarError(ErrorType.LABEL_BLOCK_NOT_A_SET, fileName, ID.token, ID.getText());
+//			break;
+//		}
+//	}
 
-	@Override
-	public void label(GrammarAST op, GrammarAST ID, GrammarAST element) {
-		switch (element.getType()) {
-		// token atoms
-		case TOKEN_REF:
-		case STRING_LITERAL:
-		case RANGE:
-		// token sets
-		case SET:
-		case NOT:
-		// rule atoms
-		case RULE_REF:
-		case WILDCARD:
-			return;
-
-		default:
-			String fileName = ID.token.getInputStream().getSourceName();
-			g.tool.errMgr.grammarError(ErrorType.LABEL_BLOCK_NOT_A_SET, fileName, ID.token, ID.getText());
-			break;
-		}
-	}
-
-	@Override
-	protected void enterTerminal(GrammarAST tree) {
-		String text = tree.getText();
-		if (text.equals("''")) {
-			g.tool.errMgr.grammarError(ErrorType.EMPTY_STRINGS_AND_SETS_NOT_ALLOWED, g.fileName, tree.token, "''");
-		}
-	}
+//	@Override
+//	protected void enterTerminal(GrammarAST tree) {
+//		String text = tree.getText();
+//		if (text.equals("''")) {
+//			g.tool.errMgr.grammarError(ErrorType.EMPTY_STRINGS_AND_SETS_NOT_ALLOWED, g.fileName, tree.token, "''");
+//		}
+//	}
 
 	/** Check option is appropriate for grammar, rule, subrule */
 	void checkOptions(GrammarAST parent, Token optionID, GrammarAST valueAST) {
@@ -514,43 +508,43 @@ public class BasicSemanticChecks extends GrammarTreeVisitor {
 	}
 
 	/** Check option is appropriate for elem; parent of ID is ELEMENT_OPTIONS */
-	boolean checkElementOptions(GrammarASTWithOptions elem,
-								GrammarAST ID,
-								GrammarAST valueAST)
-	{
-		if (checkAssocElementOption && ID != null && "assoc".equals(ID.getText())) {
-			if (elem.getType() != ANTLRParser.ALT) {
-				Token optionID = ID.token;
-				String fileName = optionID.getInputStream().getSourceName();
-				g.tool.errMgr.grammarError(ErrorType.UNRECOGNIZED_ASSOC_OPTION,
-										   fileName,
-										   optionID,
-										   currentRuleName);
-			}
-		}
-
-		if ( elem instanceof RuleRefAST ) {
-			return checkRuleRefOptions((RuleRefAST)elem, ID, valueAST);
-		}
-		if ( elem instanceof TerminalAST ) {
-			return checkTokenOptions((TerminalAST)elem, ID, valueAST);
-		}
-		if ( elem.getType()==ANTLRParser.ACTION ) {
-			return false;
-		}
-		if ( elem.getType()==ANTLRParser.SEMPRED ) {
-			Token optionID = ID.token;
-			String fileName = optionID.getInputStream().getSourceName();
-			if ( valueAST!=null && !Grammar.semPredOptions.contains(optionID.getText()) ) {
-				g.tool.errMgr.grammarError(ErrorType.ILLEGAL_OPTION,
-										   fileName,
-										   optionID,
-										   optionID.getText());
-				return false;
-			}
-		}
-		return false;
-	}
+//	boolean checkElementOptions(GrammarASTWithOptions elem,
+//								GrammarAST ID,
+//								GrammarAST valueAST)
+//	{
+//		if (checkAssocElementOption && ID != null && "assoc".equals(ID.getText())) {
+//			if (elem.getType() != ANTLRParser.ALT) {
+//				Token optionID = ID.token;
+//				String fileName = optionID.getInputStream().getSourceName();
+//				g.tool.errMgr.grammarError(ErrorType.UNRECOGNIZED_ASSOC_OPTION,
+//										   fileName,
+//										   optionID,
+//										   currentRuleName);
+//			}
+//		}
+//
+//		if ( elem instanceof RuleRefAST ) {
+//			return checkRuleRefOptions((RuleRefAST)elem, ID, valueAST);
+//		}
+//		if ( elem instanceof TerminalAST ) {
+//			return checkTokenOptions((TerminalAST)elem, ID, valueAST);
+//		}
+//		if ( elem.getType()==ANTLRParser.ACTION ) {
+//			return false;
+//		}
+//		if ( elem.getType()==ANTLRParser.SEMPRED ) {
+//			Token optionID = ID.token;
+//			String fileName = optionID.getInputStream().getSourceName();
+//			if ( valueAST!=null && !Grammar.semPredOptions.contains(optionID.getText()) ) {
+//				g.tool.errMgr.grammarError(ErrorType.ILLEGAL_OPTION,
+//										   fileName,
+//										   optionID,
+//										   optionID.getText());
+//				return false;
+//			}
+//		}
+//		return false;
+//	}
 
 	boolean checkRuleRefOptions(RuleRefAST elem, GrammarAST ID, GrammarAST valueAST) {
 		Token optionID = ID.token;

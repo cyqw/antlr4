@@ -6,12 +6,10 @@
 
 package org.antlr.v4.semantics;
 
-import org.antlr.runtime.tree.CommonTree;
-import org.antlr.runtime.tree.Tree;
 import org.antlr.v4.automata.LexerATNFactory;
-import org.antlr.v4.parse.ANTLRLexer;
 import org.antlr.v4.parse.ANTLRParser;
 import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.tool.Alternative;
 import org.antlr.v4.tool.Attribute;
 import org.antlr.v4.tool.AttributeDict;
@@ -20,12 +18,10 @@ import org.antlr.v4.tool.ErrorType;
 import org.antlr.v4.tool.Grammar;
 import org.antlr.v4.tool.LabelElementPair;
 import org.antlr.v4.tool.LabelType;
-import org.antlr.v4.tool.LeftRecursiveRule;
 import org.antlr.v4.tool.LexerGrammar;
 import org.antlr.v4.tool.Rule;
 import org.antlr.v4.tool.ast.AltAST;
 import org.antlr.v4.tool.ast.GrammarAST;
-import org.antlr.v4.tool.ast.TerminalAST;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -167,7 +163,7 @@ public class SymbolChecks {
 		}
 	}
 
-	private String findAltLabelName(CommonTree label) {
+	private String findAltLabelName(ParseTree label) {
 		if (label == null) {
 			return null;
 		}
@@ -180,47 +176,47 @@ public class SymbolChecks {
 				return altAST.leftRecursiveAltInfo.altLabel.toString();
 			}
 			else {
-				return findAltLabelName(label.parent);
+				return findAltLabelName(label.getParent());
 			}
 		}
 		else {
-			return findAltLabelName(label.parent);
+			return findAltLabelName(label.getParent());
 		}
 	}
 
 	private void checkForTypeMismatch(Rule r, LabelElementPair prevLabelPair, LabelElementPair labelPair) {
 		// label already defined; if same type, no problem
 		if (prevLabelPair.type != labelPair.type) {
-			// Current behavior: take a token of rule declaration in case of left-recursive rule
-			// Desired behavior: take a token of proper label declaration in case of left-recursive rule
-			// See https://github.com/antlr/antlr4/pull/1585
-			// Such behavior is referring to the fact that the warning is typically reported on the actual label redefinition,
-			//   but for left-recursive rules the warning is reported on the enclosing rule.
-			org.antlr.runtime.Token token = r instanceof LeftRecursiveRule
-					? ((GrammarAST) r.ast.getChild(0)).getToken()
-					: labelPair.label.token;
-			errMgr.grammarError(
-					ErrorType.LABEL_TYPE_CONFLICT,
-					g.fileName,
-					token,
-					labelPair.label.getText(),
-					labelPair.type + "!=" + prevLabelPair.type);
+//			// Current behavior: take a token of rule declaration in case of left-recursive rule
+//			// Desired behavior: take a token of proper label declaration in case of left-recursive rule
+//			// See https://github.com/antlr/antlr4/pull/1585
+//			// Such behavior is referring to the fact that the warning is typically reported on the actual label redefinition,
+//			//   but for left-recursive rules the warning is reported on the enclosing rule.
+//			org.antlr.runtime.Token token = r instanceof LeftRecursiveRule
+//					? ((GrammarAST) r.ast.getChild(0)).getToken()
+//					: labelPair.label.token;
+//			errMgr.grammarError(
+//					ErrorType.LABEL_TYPE_CONFLICT,
+//					g.fileName,
+//					token,
+//					labelPair.label.getText(),
+//					labelPair.type + "!=" + prevLabelPair.type);
 		}
 		if (!prevLabelPair.element.getText().equals(labelPair.element.getText()) &&
 			(prevLabelPair.type.equals(LabelType.RULE_LABEL) || prevLabelPair.type.equals(LabelType.RULE_LIST_LABEL)) &&
 			(labelPair.type.equals(LabelType.RULE_LABEL) || labelPair.type.equals(LabelType.RULE_LIST_LABEL))) {
 
-			org.antlr.runtime.Token token = r instanceof LeftRecursiveRule
-					? ((GrammarAST) r.ast.getChild(0)).getToken()
-					: labelPair.label.token;
-			String prevLabelOp = prevLabelPair.type.equals(LabelType.RULE_LIST_LABEL) ? "+=" : "=";
-			String labelOp = labelPair.type.equals(LabelType.RULE_LIST_LABEL) ? "+=" : "=";
-			errMgr.grammarError(
-					ErrorType.LABEL_TYPE_CONFLICT,
-					g.fileName,
-					token,
-					labelPair.label.getText() + labelOp + labelPair.element.getText(),
-					prevLabelPair.label.getText() + prevLabelOp + prevLabelPair.element.getText());
+//			org.antlr.runtime.Token token = r instanceof LeftRecursiveRule
+//					? ((GrammarAST) r.ast.getChild(0)).getToken()
+//					: labelPair.label.token;
+//			String prevLabelOp = prevLabelPair.type.equals(LabelType.RULE_LIST_LABEL) ? "+=" : "=";
+//			String labelOp = labelPair.type.equals(LabelType.RULE_LIST_LABEL) ? "+=" : "=";
+//			errMgr.grammarError(
+//					ErrorType.LABEL_TYPE_CONFLICT,
+//					g.fileName,
+//					token,
+//					labelPair.label.getText() + labelOp + labelPair.element.getText(),
+//					prevLabelPair.label.getText() + prevLabelOp + prevLabelPair.element.getText());
 		}
 	}
 
@@ -380,40 +376,40 @@ public class SymbolChecks {
 		List<String> values = new ArrayList<>();
 		for (Alternative alt : rule.alt) {
 			if (alt != null) {
-				// select first alt if token has a command
-				Tree rootNode = alt.ast.getChildCount() == 2 &&
-						alt.ast.getChild(0) instanceof AltAST && alt.ast.getChild(1) instanceof GrammarAST
-						? alt.ast.getChild(0)
-						: alt.ast;
-
-				if (rootNode.getTokenStartIndex() == -1) {
-					continue; // ignore autogenerated tokens from combined grammars that start with T__
-				}
-
-				// Ignore alt if contains not only string literals (repetition, optional)
-				boolean ignore = false;
-				StringBuilder currentValue = new StringBuilder();
-				for (int i = 0; i < rootNode.getChildCount(); i++) {
-					Tree child = rootNode.getChild(i);
-					if (!(child instanceof TerminalAST)) {
-						ignore = true;
-						break;
-					}
-
-					TerminalAST terminalAST = (TerminalAST)child;
-					if (terminalAST.token.getType() != ANTLRLexer.STRING_LITERAL) {
-						ignore = true;
-						break;
-					}
-					else {
-						String text = terminalAST.token.getText();
-						currentValue.append(text.substring(1, text.length() - 1));
-					}
-				}
-
-				if (!ignore) {
-					values.add(currentValue.toString());
-				}
+//				// select first alt if token has a command
+//				Tree rootNode = alt.ast.getChildCount() == 2 &&
+//						alt.ast.getChild(0) instanceof AltAST && alt.ast.getChild(1) instanceof GrammarAST
+//						? alt.ast.getChild(0)
+//						: alt.ast;
+//
+//				if (rootNode.getTokenStartIndex() == -1) {
+//					continue; // ignore autogenerated tokens from combined grammars that start with T__
+//				}
+//
+//				// Ignore alt if contains not only string literals (repetition, optional)
+//				boolean ignore = false;
+//				StringBuilder currentValue = new StringBuilder();
+//				for (int i = 0; i < rootNode.getChildCount(); i++) {
+//					Tree child = rootNode.getChild(i);
+//					if (!(child instanceof TerminalAST)) {
+//						ignore = true;
+//						break;
+//					}
+//
+//					TerminalAST terminalAST = (TerminalAST)child;
+//					if (terminalAST.token.getType() != ANTLRLexer.STRING_LITERAL) {
+//						ignore = true;
+//						break;
+//					}
+//					else {
+//						String text = terminalAST.token.getText();
+//						currentValue.append(text.substring(1, text.length() - 1));
+//					}
+//				}
+//
+//				if (!ignore) {
+//					values.add(currentValue.toString());
+//				}
 			}
 		}
 		return values;

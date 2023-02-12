@@ -7,6 +7,8 @@
 package org.antlr.v4.tool;
 
 import org.antlr.v4.Tool;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.Token;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
@@ -14,7 +16,11 @@ import org.stringtemplate.v4.misc.ErrorBuffer;
 
 import java.io.File;
 import java.net.URL;
-import java.util.*;
+import java.util.Collection;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 public class ErrorManager {
 	private final static Map<String, STGroupFile> loadedFormats = new HashMap<>();
@@ -113,8 +119,8 @@ public class ErrorManager {
 
 	public void syntaxError(ErrorType etype,
 								   String fileName,
-								   org.antlr.runtime.Token token,
-								   org.antlr.runtime.RecognitionException antlrException,
+								   Token token,
+								   RecognitionException antlrException,
 								   Object... args)
 	{
 		ANTLRMessage msg = new GrammarSyntaxMessage(etype,fileName,token,antlrException,args);
@@ -155,7 +161,7 @@ public class ErrorManager {
 
     public void grammarError(ErrorType etype,
 							 String fileName,
-							 org.antlr.runtime.Token token,
+							 org.antlr.v4.runtime.Token token,
 							 Object... args)
 	{
         ANTLRMessage msg = new GrammarSemanticsMessage(etype,fileName,token,args);

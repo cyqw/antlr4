@@ -17,6 +17,7 @@ import org.antlr.v4.parse.GrammarASTAdaptor;
 import org.antlr.v4.parse.GrammarTreeVisitor;
 import org.antlr.v4.parse.TokenVocabParser;
 import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.LexerInterpreter;
 import org.antlr.v4.runtime.ParserInterpreter;
@@ -29,7 +30,11 @@ import org.antlr.v4.runtime.atn.ATNDeserializer;
 import org.antlr.v4.runtime.atn.ATNSerializer;
 import org.antlr.v4.runtime.atn.SemanticContext;
 import org.antlr.v4.runtime.dfa.DFA;
-import org.antlr.v4.runtime.misc.*;
+import org.antlr.v4.runtime.misc.IntSet;
+import org.antlr.v4.runtime.misc.IntegerList;
+import org.antlr.v4.runtime.misc.Interval;
+import org.antlr.v4.runtime.misc.IntervalSet;
+import org.antlr.v4.runtime.misc.Pair;
 import org.antlr.v4.tool.ast.ActionAST;
 import org.antlr.v4.tool.ast.GrammarAST;
 import org.antlr.v4.tool.ast.GrammarASTWithOptions;
@@ -141,17 +146,8 @@ public class Grammar implements AttributeResolver {
 
 	/** Track token stream used to create this grammar */
 
-	public final org.antlr.runtime.TokenStream tokenStream;
 
-	/** If we transform grammar, track original unaltered token stream.
-	 *  This is set to the same value as tokenStream when tokenStream is
-	 *  initially set.
-	 *
-	 *  If this field differs from tokenStream, then we have transformed
-	 *  the grammar.
-	 */
 
-	public org.antlr.runtime.TokenStream originalTokenStream;
 
     public String text; // testing only
     public String fileName;
@@ -271,52 +267,47 @@ public class Grammar implements AttributeResolver {
 			throw new NullPointerException("ast");
 		}
 
-		if (ast.tokenStream == null) {
-			throw new IllegalArgumentException("ast must have a token stream");
-		}
 
         this.tool = tool;
         this.ast = ast;
         this.name = (ast.getChild(0)).getText();
-		this.tokenStream = ast.tokenStream;
-		this.originalTokenStream = this.tokenStream;
 
 		initTokenSymbolTables();
     }
 
 	/** For testing */
-	public Grammar(String grammarText) throws org.antlr.runtime.RecognitionException {
+	public Grammar(String grammarText) throws org.antlr.v4.runtime.RecognitionException {
 		this(GRAMMAR_FROM_STRING_NAME, grammarText, null);
 	}
 
-	public Grammar(String grammarText, LexerGrammar tokenVocabSource) throws org.antlr.runtime.RecognitionException {
+	public Grammar(String grammarText, LexerGrammar tokenVocabSource) throws org.antlr.v4.runtime.RecognitionException {
 		this(GRAMMAR_FROM_STRING_NAME, grammarText, tokenVocabSource, null);
 	}
 
 	/** For testing */
 	public Grammar(String grammarText, ANTLRToolListener listener)
-		throws org.antlr.runtime.RecognitionException
+		throws org.antlr.v4.runtime.RecognitionException
 	{
 		this(GRAMMAR_FROM_STRING_NAME, grammarText, listener);
 	}
 
 	/** For testing; builds trees, does sem anal */
 	public Grammar(String fileName, String grammarText)
-		throws org.antlr.runtime.RecognitionException
+		throws org.antlr.v4.runtime.RecognitionException
 	{
 		this(fileName, grammarText, null);
 	}
 
 	/** For testing; builds trees, does sem anal */
 	public Grammar(String fileName, String grammarText, ANTLRToolListener listener)
-		throws org.antlr.runtime.RecognitionException
+		throws org.antlr.v4.runtime.RecognitionException
 	{
 		this(fileName, grammarText, null, listener);
 	}
 
 	/** For testing; builds trees, does sem anal */
 	public Grammar(String fileName, String grammarText, Grammar tokenVocabSource, ANTLRToolListener listener)
-		throws org.antlr.runtime.RecognitionException
+		throws org.antlr.v4.runtime.RecognitionException
 	{
         this.text = grammarText;
 		this.fileName = fileName;
@@ -331,20 +322,14 @@ public class Grammar implements AttributeResolver {
 		};
 		tool.addListener(hush); // we want to hush errors/warnings
 		this.tool.addListener(listener);
-		org.antlr.runtime.ANTLRStringStream in = new org.antlr.runtime.ANTLRStringStream(grammarText);
-		in.name = fileName;
+		org.antlr.v4.runtime.CharStream in = CharStreams.fromString(grammarText, fileName);
 
 		this.ast = tool.parse(fileName, in);
 		if ( ast==null ) {
 			throw new UnsupportedOperationException();
 		}
 
-		if (ast.tokenStream == null) {
-			throw new IllegalStateException("expected ast to have a token stream");
-		}
 
-		this.tokenStream = ast.tokenStream;
-		this.originalTokenStream = this.tokenStream;
 
 		// ensure each node has pointer to surrounding grammar
 		final Grammar thiz = this;
@@ -1143,10 +1128,6 @@ public class Grammar implements AttributeResolver {
         return 0;
     }
 
-	public org.antlr.runtime.TokenStream getTokenStream() {
-		if ( ast!=null ) return ast.tokenStream;
-		return null;
-	}
 
 	public boolean isLexer() { return getType()==ANTLRParser.LEXER; }
 	public boolean isParser() { return getType()==ANTLRParser.PARSER; }
@@ -1222,7 +1203,7 @@ public class Grammar implements AttributeResolver {
 		for (GrammarAST r : ruleNodes) {
 			//tool.log("grammar", r.toStringTree());
 //			System.out.println("chk: "+r.toStringTree());
-			org.antlr.runtime.tree.Tree name = r.getChild(0);
+			GrammarAST name = r.getChild(0);
 			if ( name.getType()==ANTLRParser.TOKEN_REF ) {
 				// check rule against patterns
 				boolean isLitRule;
@@ -1279,7 +1260,7 @@ public class Grammar implements AttributeResolver {
 		for (GrammarAST n : nodes) {
 			if (n.atnState != null) {
 				Interval tokenRegion = Interval.of(n.getTokenStartIndex(), n.getTokenStopIndex());
-				org.antlr.runtime.tree.Tree ruleNode = null;
+				GrammarAST ruleNode = null;
 				// RULEs, BLOCKs of transformed recursive rules point to original token interval
 				switch ( n.getType() ) {
 					case ANTLRParser.RULE :

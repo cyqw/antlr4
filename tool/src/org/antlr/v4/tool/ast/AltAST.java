@@ -6,7 +6,7 @@
 
 package org.antlr.v4.tool.ast;
 
-import org.antlr.runtime.Token;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.analysis.LeftRecursiveRuleAltInfo;
 import org.antlr.v4.tool.Alternative;
 
@@ -34,8 +34,8 @@ public class AltAST extends GrammarASTWithOptions {
 	public AltAST(int type, Token t) { super(type, t); }
 	public AltAST(int type, Token t, String text) { super(type,t,text); }
 
-	@Override
-	public AltAST dupNode() { return new AltAST(this); }
+//	@Override
+//	public AltAST dupNode() { return new AltAST(this); }
 
 	@Override
 	public Object visit(GrammarASTVisitor v) { return v.visit(this); }

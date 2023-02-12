@@ -6,18 +6,20 @@
 
 package org.antlr.v4.parse;
 
-import org.antlr.runtime.CommonToken;
-import org.antlr.runtime.Token;
-import org.antlr.runtime.tree.CommonTreeAdaptor;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CommonToken;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.tool.ast.GrammarAST;
 import org.antlr.v4.tool.ast.GrammarASTErrorNode;
 import org.antlr.v4.tool.ast.RuleAST;
 import org.antlr.v4.tool.ast.TerminalAST;
 
 public class GrammarASTAdaptor extends CommonTreeAdaptor {
-    org.antlr.runtime.CharStream input; // where we can find chars ref'd by tokens in tree
+    CharStream input; // where we can find chars ref'd by tokens in tree
     public GrammarASTAdaptor() { }
-    public GrammarASTAdaptor(org.antlr.runtime.CharStream input) { this.input = input; }
+    public GrammarASTAdaptor(CharStream input) { this.input = input; }
 
     @Override
     public Object create(Token token) {
@@ -40,19 +42,19 @@ public class GrammarASTAdaptor extends CommonTreeAdaptor {
 		else {
 			t = (GrammarAST)super.create(tokenType, text);
 		}
-        t.token.setInputStream(input);
         return t;
     }
 
     @Override
     public Object dupNode(Object t) {
-        if ( t==null ) return null;
-        return ((GrammarAST)t).dupNode(); //create(((GrammarAST)t).token);
+//        if ( t==null ) return null;
+//        return ((GrammarAST)t).dupNode(); //create(((GrammarAST)t).token);
+		return null;
     }
 
     @Override
-    public Object errorNode(org.antlr.runtime.TokenStream input, org.antlr.runtime.Token start, org.antlr.runtime.Token stop,
-                            org.antlr.runtime.RecognitionException e)
+    public Object errorNode(TokenStream input, Token start, Token stop,
+							RecognitionException e)
     {
         return new GrammarASTErrorNode(input, start, stop, e);
     }

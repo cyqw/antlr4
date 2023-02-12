@@ -6,7 +6,7 @@
 
 package org.antlr.v4.parse;
 
-import org.antlr.runtime.Token;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.Tool;
 import org.antlr.v4.codegen.CodeGenerator;
 import org.antlr.v4.tool.ErrorType;
@@ -69,7 +69,7 @@ public class TokenVocabParser {
 											  vocabName + CodeGenerator.VOCAB_FILE_EXTENSION,
 											  " bad token type: "+tokenTypeS,
 											  lineNum);
-						tokenType = Token.INVALID_TOKEN_TYPE;
+						tokenType = Token.INVALID_TYPE;
 					}
 					tool.log("grammar", "import "+tokenID+"="+tokenType);
 					tokens.put(tokenID, tokenType);
@@ -149,7 +149,7 @@ public class TokenVocabParser {
 		if ( f.exists() ) {
 			return f;
 		}
-		
+
 		// Still not found? Use the grammar's subfolder then.
 		String fileDirectory;
 

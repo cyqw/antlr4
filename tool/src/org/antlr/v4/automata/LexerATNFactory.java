@@ -6,18 +6,36 @@
 
 package org.antlr.v4.automata;
 
-import org.antlr.runtime.CommonToken;
-import org.antlr.runtime.Token;
-import org.antlr.runtime.tree.CommonTree;
 import org.antlr.v4.codegen.CodeGenerator;
 import org.antlr.v4.misc.CharSupport;
 import org.antlr.v4.misc.EscapeSequenceParsing;
 import org.antlr.v4.parse.ANTLRParser;
+import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.IntStream;
 import org.antlr.v4.runtime.Lexer;
-import org.antlr.v4.runtime.atn.*;
+import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.atn.ATN;
+import org.antlr.v4.runtime.atn.ATNState;
+import org.antlr.v4.runtime.atn.ActionTransition;
+import org.antlr.v4.runtime.atn.AtomTransition;
+import org.antlr.v4.runtime.atn.CodePointTransitions;
+import org.antlr.v4.runtime.atn.LexerAction;
+import org.antlr.v4.runtime.atn.LexerChannelAction;
+import org.antlr.v4.runtime.atn.LexerCustomAction;
+import org.antlr.v4.runtime.atn.LexerModeAction;
+import org.antlr.v4.runtime.atn.LexerMoreAction;
+import org.antlr.v4.runtime.atn.LexerPopModeAction;
+import org.antlr.v4.runtime.atn.LexerPushModeAction;
+import org.antlr.v4.runtime.atn.LexerSkipAction;
+import org.antlr.v4.runtime.atn.LexerTypeAction;
+import org.antlr.v4.runtime.atn.NotSetTransition;
+import org.antlr.v4.runtime.atn.RuleStartState;
+import org.antlr.v4.runtime.atn.SetTransition;
+import org.antlr.v4.runtime.atn.TokensStartState;
+import org.antlr.v4.runtime.atn.Transition;
 import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.misc.IntervalSet;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.tool.ErrorType;
 import org.antlr.v4.tool.LexerGrammar;
 import org.antlr.v4.tool.Rule;
@@ -601,7 +619,7 @@ public class LexerATNFactory extends ParserATNFactory {
 		return status;
 	}
 
-	private Transition createTransition(ATNState target, int from, int to, CommonTree tree) {
+	private Transition createTransition(ATNState target, int from, int to, ParseTree tree) {
 		RangeBorderCharactersData charactersData = RangeBorderCharactersData.getAndCheckCharactersData(from, to, g, tree, true);
 		if (currentRule.caseInsensitive) {
 			if (charactersData.isSingleRange()) {
