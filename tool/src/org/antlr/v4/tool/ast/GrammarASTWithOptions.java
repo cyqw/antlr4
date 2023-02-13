@@ -11,7 +11,6 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.tool.ErrorType;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -71,11 +70,4 @@ public abstract class GrammarASTWithOptions extends GrammarAST {
 //	public abstract GrammarASTWithOptions dupNode();
 
 
-	public Map<String, GrammarAST> getOptions() {
-		if (options == null) {
-			return Collections.emptyMap();
-		}
-
-		return options;
-	}
 }

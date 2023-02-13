@@ -14,7 +14,6 @@ import org.antlr.v4.codegen.CodeGenPipeline;
 import org.antlr.v4.codegen.CodeGenerator;
 import org.antlr.v4.misc.Graph;
 import org.antlr.v4.parse.ANTLRParser;
-import org.antlr.v4.parse.GrammarASTAdaptor;
 import org.antlr.v4.parse.GrammarTreeVisitor;
 import org.antlr.v4.parse.ToolANTLRLexer;
 import org.antlr.v4.parse.ToolANTLRParser;
@@ -636,7 +635,6 @@ public class Tool {
 
 	public GrammarRootAST parse(String fileName, CharStream in) {
 		try {
-			GrammarASTAdaptor adaptor = new GrammarASTAdaptor(in);
 			ToolANTLRLexer lexer = new ToolANTLRLexer(in, this);
 			CommonTokenStream tokens = new CommonTokenStream(lexer);
 			ToolANTLRParser p = new ToolANTLRParser(tokens, this);
@@ -644,11 +642,11 @@ public class Tool {
 			GrammarTreeVisitor listener = new GrammarTreeVisitor();
 			ParseTreeWalker.DEFAULT.walk(listener, r);
 			GrammarRootAST root = listener.getTree();
-			((GrammarRootAST) root).hasErrors = lexer.getNumberOfSyntaxErrors() > 0 || p.getNumberOfSyntaxErrors() > 0;
+			root.hasErrors = lexer.getNumberOfSyntaxErrors() > 0 || p.getNumberOfSyntaxErrors() > 0;
 			if (grammarOptions != null) {
-				((GrammarRootAST) root).cmdLineOptions = grammarOptions;
+				root.cmdLineOptions = grammarOptions;
 			}
-			return ((GrammarRootAST) root);
+			return root;
 		}
 		catch (RecognitionException re) {
 			// TODO: do we gen errors now?

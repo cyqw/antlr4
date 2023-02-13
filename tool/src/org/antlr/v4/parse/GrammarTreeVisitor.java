@@ -69,6 +69,7 @@ public class GrammarTreeVisitor extends ANTLRParserBaseListener{
 		if (root.tokenVocab == null && ctx.identifier().getText().equals("tokenVocab")) {
 			root.tokenVocab = ctx.optionValue();
 		}
+		root.setOption(ctx.identifier().getText(), new GrammarAST(ctx.optionValue()));
 		super.enterOption(ctx);
 	}
 }

@@ -37,7 +37,6 @@ import org.antlr.v4.runtime.misc.IntervalSet;
 import org.antlr.v4.runtime.misc.Pair;
 import org.antlr.v4.tool.ast.ActionAST;
 import org.antlr.v4.tool.ast.GrammarAST;
-import org.antlr.v4.tool.ast.GrammarASTWithOptions;
 import org.antlr.v4.tool.ast.GrammarRootAST;
 import org.antlr.v4.tool.ast.PredAST;
 import org.antlr.v4.tool.ast.RuleAST;
@@ -1161,23 +1160,6 @@ public class Grammar implements AttributeResolver {
 
 	public String getOptionString(String key) { return ast.getOptionString(key); }
 
-	/** Given ^(TOKEN_REF ^(OPTIONS ^(ELEMENT_OPTIONS (= assoc right))))
-	 *  set option assoc=right in TOKEN_REF.
-	 */
-	public static void setNodeOptions(GrammarAST node, GrammarAST options) {
-		if ( options==null ) return;
-		GrammarASTWithOptions t = (GrammarASTWithOptions)node;
-		if ( t.getChildCount()==0 || options.getChildCount()==0 ) return;
-		for (Object o : options.getChildren()) {
-			GrammarAST c = (GrammarAST)o;
-			if ( c.getType()==ANTLRParser.ASSIGN ) {
-				t.setOption(c.getChild(0).getText(), (GrammarAST)c.getChild(1));
-			}
-			else {
-				t.setOption(c.getText(), null); // no arg such as ID<VarNodeType>
-			}
-		}
-	}
 
 	/** Return list of (TOKEN_NAME node, 'literal' node) pairs */
 	public static List<Pair<GrammarAST,GrammarAST>> getStringLiteralAliasesFromLexerRules(GrammarRootAST ast) {

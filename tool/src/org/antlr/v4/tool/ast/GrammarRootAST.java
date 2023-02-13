@@ -23,6 +23,7 @@ public class GrammarRootAST extends GrammarASTWithOptions {
 
 	public int grammarType; // LEXER, PARSER, GRAMMAR (combined)
 
+	//TODO: TBD which item is need when two tokenVocabs in options
 	public ANTLRParser.OptionValueContext tokenVocab;
 	public boolean hasErrors;
 	/** Track stream used to create this tree */
