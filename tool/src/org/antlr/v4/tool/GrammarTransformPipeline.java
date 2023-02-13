@@ -85,7 +85,7 @@ public class GrammarTransformPipeline {
 		});
 	}
 
-//	public static void augmentTokensWithOriginalPosition(final Grammar g, GrammarAST tree) {
+	//	public static void augmentTokensWithOriginalPosition(final Grammar g, GrammarAST tree) {
 //		if ( tree==null ) return;
 //
 //		List<GrammarAST> optionsSubTrees = tree.getNodesWithType(ANTLRParser.ELEMENT_OPTIONS);

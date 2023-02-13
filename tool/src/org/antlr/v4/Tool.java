@@ -14,6 +14,7 @@ import org.antlr.v4.codegen.CodeGenPipeline;
 import org.antlr.v4.codegen.CodeGenerator;
 import org.antlr.v4.misc.Graph;
 import org.antlr.v4.parse.ANTLRParser;
+import org.antlr.v4.parse.GrammarASTAdaptor;
 import org.antlr.v4.parse.GrammarTreeVisitor;
 import org.antlr.v4.parse.ToolANTLRLexer;
 import org.antlr.v4.parse.ToolANTLRParser;
@@ -26,6 +27,7 @@ import org.antlr.v4.runtime.RuntimeMetaData;
 import org.antlr.v4.runtime.atn.ATNSerializer;
 import org.antlr.v4.runtime.misc.IntegerList;
 import org.antlr.v4.runtime.misc.LogManager;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.antlr.v4.semantics.SemanticPipeline;
 import org.antlr.v4.tool.ANTLRMessage;
 import org.antlr.v4.tool.ANTLRToolListener;
@@ -500,9 +502,9 @@ public class Tool {
 			GrammarRootAST root = (GrammarRootAST)t;
 			roots.add(root);
 			root.fileName = fileName;
-			String grammarName = root.getChild(0).getText();
+			String grammarName = root.getGrammarName();
 
-			GrammarAST tokenVocabNode = findOptionValueAST(root, "tokenVocab");
+			ANTLRParser.OptionValueContext tokenVocabNode = root.tokenVocab;
 			// Make grammars depend on any tokenVocab options
 			if ( tokenVocabNode!=null ) {
 				String vocabName = tokenVocabNode.getText();
@@ -541,23 +543,6 @@ public class Tool {
 
 		return sortedRoots;
 	}
-
-	/** Manually get option node from tree; return null if no defined. */
-	public static GrammarAST findOptionValueAST(GrammarRootAST root, String option) {
-		GrammarAST options = (GrammarAST)root.getFirstChildWithType(ANTLRParser.OPTIONS);
-		if ( options!=null && options.getChildCount() > 0 ) {
-			for (Object o : options.getChildren()) {
-				GrammarAST c = (GrammarAST)o;
-				if ( c.getType() == ANTLRParser.ASSIGN &&
-					 c.getChild(0).getText().equals(option) )
-				{
-					return (GrammarAST)c.getChild(1);
-				}
-			}
-		}
-		return null;
-	}
-
 
 	/** Given the raw AST of a grammar, create a grammar object
 		associated with the AST. Once we have the grammar object, ensure
@@ -651,16 +636,19 @@ public class Tool {
 
 	public GrammarRootAST parse(String fileName, CharStream in) {
 		try {
+			GrammarASTAdaptor adaptor = new GrammarASTAdaptor(in);
 			ToolANTLRLexer lexer = new ToolANTLRLexer(in, this);
 			CommonTokenStream tokens = new CommonTokenStream(lexer);
 			ToolANTLRParser p = new ToolANTLRParser(tokens, this);
 			ANTLRParser.GrammarSpecContext r = p.grammarSpec();
-			GrammarRootAST root = new GrammarRootAST(p, r);
-			root.hasErrors = lexer.getNumberOfSyntaxErrors() > 0 || p.getNumberOfSyntaxErrors() > 0;
+			GrammarTreeVisitor listener = new GrammarTreeVisitor();
+			ParseTreeWalker.DEFAULT.walk(listener, r);
+			GrammarRootAST root = listener.getTree();
+			((GrammarRootAST) root).hasErrors = lexer.getNumberOfSyntaxErrors() > 0 || p.getNumberOfSyntaxErrors() > 0;
 			if (grammarOptions != null) {
-				root.cmdLineOptions = grammarOptions;
+				((GrammarRootAST) root).cmdLineOptions = grammarOptions;
 			}
-			return root;
+			return ((GrammarRootAST) root);
 		}
 		catch (RecognitionException re) {
 			// TODO: do we gen errors now?

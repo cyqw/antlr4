@@ -7,7 +7,6 @@
 package org.antlr.v4.tool.ast;
 
 import org.antlr.v4.misc.CharSupport;
-import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.tool.ErrorType;
@@ -24,8 +23,8 @@ public abstract class GrammarASTWithOptions extends GrammarAST {
 		this.options = node.options;
 	}
 
-	public GrammarASTWithOptions(Parser p, ParseTree tree) {
-		super(p, tree);
+	public GrammarASTWithOptions(ParseTree tree) {
+		super(tree);
 	}
 	public GrammarASTWithOptions(Token t) { super(t); }
     public GrammarASTWithOptions(int type) { super(type); }

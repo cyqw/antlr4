@@ -32,6 +32,10 @@ public class GrammarAST implements ParseTree {
 	// TODO: try to remove
 	public Grammar g;
 
+	public ParseTree getTree() {
+		return tree;
+	}
+
 	/** If we build an ATN, we make AST node point at left edge of ATN construct */
 	public ATNState atnState;
 
@@ -60,9 +64,8 @@ public class GrammarAST implements ParseTree {
 //		token.setText(text);
     }
 
-	public GrammarAST(Parser parser, ParseTree tree) {
+	public GrammarAST(ParseTree tree) {
 		this.tree = tree;
-		this.parser = parser;
 	}
 
 	public GrammarAST[] getChildrenAsArray() {
@@ -253,7 +256,7 @@ public class GrammarAST implements ParseTree {
 	public Object visit(GrammarASTVisitor v) { return v.visit(this); }
 
 	public GrammarAST getChild(int i) {
-		return null;
+		return new GrammarAST(tree.getChild(i));
 	}
 
 	@Override

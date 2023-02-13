@@ -6,10 +6,9 @@
 
 package org.antlr.v4.tool.ast;
 
-import org.antlr.v4.runtime.Parser;
+import org.antlr.v4.parse.ANTLRParser;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenStream;
-import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,7 +19,11 @@ public class GrammarRootAST extends GrammarASTWithOptions {
 		defaultOptions.put("language","Java");
 	}
 
-    public int grammarType; // LEXER, PARSER, GRAMMAR (combined)
+	private ANTLRParser.GrammarSpecContext root;
+
+	public int grammarType; // LEXER, PARSER, GRAMMAR (combined)
+
+	public ANTLRParser.OptionValueContext tokenVocab;
 	public boolean hasErrors;
 	/** Track stream used to create this tree */
 
@@ -57,14 +60,13 @@ public class GrammarRootAST extends GrammarASTWithOptions {
 
     }
 
-	public GrammarRootAST(Parser p, ParseTree r) {
-		super(p, r);
+	public GrammarRootAST(ANTLRParser.GrammarSpecContext r) {
+		super(r);
+		this.root = r;
 	}
 
 	public String getGrammarName() {
-		GrammarAST t = getChild(0);
-		if ( t!=null ) return t.getText();
-		return null;
+		return root.grammarDecl().identifier().getText();
 	}
 
 	@Override
