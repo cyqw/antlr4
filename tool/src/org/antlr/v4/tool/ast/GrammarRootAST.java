@@ -10,8 +10,11 @@ import org.antlr.v4.parse.ANTLRParser;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenStream;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class GrammarRootAST extends GrammarASTWithOptions {
 	public static final Map<String, String> defaultOptions = new HashMap<String, String>();
@@ -25,6 +28,8 @@ public class GrammarRootAST extends GrammarASTWithOptions {
 
 	//TODO: TBD which item is need when two tokenVocabs in options
 	public ANTLRParser.OptionValueContext tokenVocab;
+	private List<ANTLRParser.LexerRuleSpecContext> lexerRules = new ArrayList<>();
+	private List<ANTLRParser.ParserRuleSpecContext> parserRules = new ArrayList<>();
 	public boolean hasErrors;
 	/** Track stream used to create this tree */
 
@@ -84,6 +89,19 @@ public class GrammarRootAST extends GrammarASTWithOptions {
 
 	@Override
 	public Object visit(GrammarASTVisitor v) { return v.visit(this); }
+
+	public void addParserRule(ANTLRParser.ParserRuleSpecContext rule) {
+		parserRules.add(rule);
+	}
+	public void addLexerRule(ANTLRParser.LexerRuleSpecContext rule) {
+		lexerRules.add(rule);
+	}
+
+	public List<RuleAST> getRules() {
+		List<RuleAST> rules = lexerRules.stream().map(RuleAST::new).collect(Collectors.toList());
+		parserRules.stream().map(RuleAST::new).forEach(rules::add);
+		return rules;
+	}
 
 //	@Override
 //	public GrammarRootAST dupNode() { return new GrammarRootAST(this); }

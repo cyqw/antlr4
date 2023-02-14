@@ -6,8 +6,6 @@
 
 package org.antlr.v4.tool;
 
-import org.antlr.runtime.tree.TreeVisitor;
-import org.antlr.runtime.tree.TreeVisitorAction;
 import org.antlr.v4.Tool;
 import org.antlr.v4.parse.BlockSetTransformer;
 import org.antlr.v4.parse.GrammarASTAdaptor;
@@ -53,18 +51,18 @@ public class GrammarTransformPipeline {
      *  todo: do we want?
      */
     public void expandParameterizedLoops(GrammarAST root) {
-        TreeVisitor v = new TreeVisitor(new GrammarASTAdaptor());
-        v.visit(root, new TreeVisitorAction() {
-            @Override
-            public Object pre(Object t) {
-                if ( ((GrammarAST)t).getType() == 3 ) {
-                    return expandParameterizedLoop((GrammarAST)t);
-                }
-                return t;
-            }
-            @Override
-            public Object post(Object t) { return t; }
-        });
+//        TreeVisitor v = new TreeVisitor(new GrammarASTAdaptor());
+//        v.visit(root, new TreeVisitorAction() {
+//            @Override
+//            public Object pre(Object t) {
+//                if ( ((GrammarAST)t).getType() == 3 ) {
+//                    return expandParameterizedLoop((GrammarAST)t);
+//                }
+//                return t;
+//            }
+//            @Override
+//            public Object post(Object t) { return t; }
+//        });
     }
 
     public GrammarAST expandParameterizedLoop(GrammarAST t) {
@@ -74,15 +72,15 @@ public class GrammarTransformPipeline {
 
     /** Utility visitor that sets grammar ptr in each node */
 	public static void setGrammarPtr(final Grammar g, GrammarAST tree) {
-		if ( tree==null ) return;
-		// ensure each node has pointer to surrounding grammar
-		TreeVisitor v = new TreeVisitor(new GrammarASTAdaptor());
-		v.visit(tree, new TreeVisitorAction() {
-			@Override
-			public Object pre(Object t) { ((GrammarAST)t).g = g; return t; }
-			@Override
-			public Object post(Object t) { return t; }
-		});
+//		if ( tree==null ) return;
+//		// ensure each node has pointer to surrounding grammar
+//		TreeVisitor v = new TreeVisitor(new GrammarASTAdaptor());
+//		v.visit(tree, new TreeVisitorAction() {
+//			@Override
+//			public Object pre(Object t) { ((GrammarAST)t).g = g; return t; }
+//			@Override
+//			public Object post(Object t) { return t; }
+//		});
 	}
 
 	//	public static void augmentTokensWithOriginalPosition(final Grammar g, GrammarAST tree) {

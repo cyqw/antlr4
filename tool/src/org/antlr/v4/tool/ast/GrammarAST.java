@@ -274,7 +274,7 @@ public class GrammarAST implements ParseTree {
 	}
 
 	public String getText() {
-		return null;
+		return tree.getText();
 	}
 
 	@Override

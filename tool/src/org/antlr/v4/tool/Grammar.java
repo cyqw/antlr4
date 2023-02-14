@@ -269,7 +269,7 @@ public class Grammar implements AttributeResolver {
 
         this.tool = tool;
         this.ast = ast;
-        this.name = (ast.getChild(0)).getText();
+        this.name = ast.getGrammarName();
 
 		initTokenSymbolTables();
     }

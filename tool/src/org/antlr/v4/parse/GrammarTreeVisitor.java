@@ -72,4 +72,16 @@ public class GrammarTreeVisitor extends ANTLRParserBaseListener{
 		root.setOption(ctx.identifier().getText(), new GrammarAST(ctx.optionValue()));
 		super.enterOption(ctx);
 	}
+
+	@Override
+	public void enterLexerRuleSpec(ANTLRParser.LexerRuleSpecContext ctx) {
+		root.addLexerRule(ctx);
+		super.enterLexerRuleSpec(ctx);
+	}
+
+	@Override
+	public void enterParserRuleSpec(ANTLRParser.ParserRuleSpecContext ctx) {
+		root.addParserRule(ctx);
+		super.enterParserRuleSpec(ctx);
+	}
 }

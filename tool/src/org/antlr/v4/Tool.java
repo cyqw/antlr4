@@ -424,21 +424,17 @@ public class Tool {
 	 */
 	public boolean checkForRuleIssues(final Grammar g) {
 		// check for redefined rules
-		GrammarAST RULES = (GrammarAST)g.ast.getFirstChildWithType(ANTLRParser.RULES);
-		List<GrammarAST> rules = new ArrayList<GrammarAST>(RULES.getAllChildrenWithType(ANTLRParser.RULE));
-		for (GrammarAST mode : g.ast.getAllChildrenWithType(ANTLRParser.MODE)) {
-			rules.addAll(mode.getAllChildrenWithType(ANTLRParser.RULE));
-		}
+		List<RuleAST> rules = g.ast.getRules();
+
 
 		boolean redefinition = false;
-		final Map<String, RuleAST> ruleToAST = new HashMap<String, RuleAST>();
-		for (GrammarAST r : rules) {
-			RuleAST ruleAST = (RuleAST)r;
-			GrammarAST ID = (GrammarAST)ruleAST.getChild(0);
+		final Map<String, RuleAST> ruleToAST = new HashMap<>();
+		for (RuleAST ruleAST : rules) {
+			GrammarAST ID = ruleAST.getChild(0);
 			String ruleName = ID.getText();
 			RuleAST prev = ruleToAST.get(ruleName);
 			if ( prev !=null ) {
-				GrammarAST prevChild = (GrammarAST)prev.getChild(0);
+				GrammarAST prevChild = prev.getChild(0);
 				g.tool.errMgr.grammarError(ErrorType.RULE_REDEFINITION,
 										   g.fileName,
 										   ID.getToken(),
@@ -555,7 +551,7 @@ public class Tool {
 		else g = new Grammar(this, ast);
 
 		// ensure each node has pointer to surrounding grammar
-		GrammarTransformPipeline.setGrammarPtr(g, ast);
+//		GrammarTransformPipeline.setGrammarPtr(g, ast);
 		return g;
 	}
 
