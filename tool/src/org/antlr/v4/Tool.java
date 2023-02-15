@@ -14,23 +14,18 @@ import org.antlr.v4.codegen.CodeGenPipeline;
 import org.antlr.v4.codegen.CodeGenerator;
 import org.antlr.v4.misc.Graph;
 import org.antlr.v4.parse.ANTLRParser;
-import org.antlr.v4.parse.ANTLRParser.LexerRuleSpecContext;
 import org.antlr.v4.parse.GrammarTreeVisitor;
 import org.antlr.v4.parse.ToolANTLRLexer;
 import org.antlr.v4.parse.ToolANTLRParser;
-import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.RecognitionException;
-import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.RuntimeMetaData;
-import org.antlr.v4.runtime.atn.ATNConfigSet;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.atn.ATNSerializer;
-import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.misc.IntegerList;
 import org.antlr.v4.runtime.misc.LogManager;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -49,12 +44,10 @@ import org.antlr.v4.tool.Grammar;
 import org.antlr.v4.tool.GrammarTransformPipeline;
 import org.antlr.v4.tool.LexerGrammar;
 import org.antlr.v4.tool.Rule;
-import org.antlr.v4.tool.ast.ActionAST;
 import org.antlr.v4.tool.ast.GrammarAST;
 import org.antlr.v4.tool.ast.GrammarASTErrorNode;
 import org.antlr.v4.tool.ast.GrammarRootAST;
 import org.antlr.v4.tool.ast.RuleAST;
-import org.antlr.v4.tool.ast.TerminalAST;
 import org.stringtemplate.v4.STGroup;
 
 import java.io.BufferedWriter;
@@ -68,7 +61,6 @@ import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.BitSet;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -438,38 +430,48 @@ public class Tool {
 		}
 
 		// check for undefined rules
-		class UndefChecker extends GrammarTreeVisitor {
+		class UndefChecker {
 			public boolean badref = false;
-			@Override
-			public void tokenRef(TerminalAST ref) {
+			public void tokenRef(TerminalNode ref) {
 				if ("EOF".equals(ref.getText())) {
 					// this is a special predefined reference
 					return;
 				}
 
-				if ( g.isLexer() ) ruleRef(ref, null);
+				if ( g.isLexer() ) ruleRef(ref);
 			}
-
-			@Override
-			public void ruleRef(GrammarAST ref, ActionAST arg) {
+			public void ruleRef(TerminalNode ref) {
 				RuleAST ruleAST = ruleToAST.get(ref.getText());
-				String fileName = ref.getToken().getInputStream().getSourceName();
+				String fileName = g.fileName;
 				if ( ruleAST==null ) {
 					badref = true;
 					errMgr.grammarError(ErrorType.UNDEFINED_RULE_REF,
-										fileName, ref.token, ref.getText());
+										fileName, (Token) ref.getPayload(), ref.getText());
 				}
 			}
-			@Override
-			public ErrorManager getErrorManager() { return errMgr; }
 
-			public void check() {
+			public void check(GrammarRootAST ast) {
+				ast.getTokenRefs().forEach(terminalContext -> tokenRef(terminalContext.TOKEN_REF()));
+				ast.getRuleRefs().forEach(terminalContext -> tokenRef(terminalContext.RULE_REF()));
+				ast.getErrorContexts().forEach(this::dealErrorNode);
+			}
 
+			private void dealErrorNode(ParserRuleContext context) {
+				ANTLRParser.LexerRuleSpecContext lexerRuleNode = Trees.getParent(context, ANTLRParser.LexerRuleSpecContext.class);
+				Collection<ParseTree> ruleTokens = Trees.findAllTokenNodes(context, ANTLRParser.RULE_REF);
+				if (lexerRuleNode != null &&
+						!ruleTokens.isEmpty())
+				{
+					TerminalNode token = (TerminalNode) ruleTokens.iterator().next();
+					badref = true;
+					errMgr.grammarError(ErrorType.PARSER_RULE_REF_IN_LEXER_RULE,
+							g.fileName, token.getSymbol(), token.getText(), lexerRuleNode.TOKEN_REF().getText());
+				}
 			}
 		}
 
 		UndefChecker chk = new UndefChecker();
-		chk.visitGrammar(g.ast);
+		chk.check(g.ast);
 
 		return redefinition || chk.badref;
 	}
@@ -619,48 +621,13 @@ public class Tool {
 
 	public GrammarRootAST parse(String fileName, CharStream in) {
 		try {
-			ANTLRErrorListener errorListener = new ANTLRErrorListener() {
-
-				@Override
-				public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
-					ParserRuleContext context = ((Parser)recognizer).getContext();
-					LexerRuleSpecContext lexerAltNode = Trees.getParent(context, LexerRuleSpecContext.class);
-					Collection<ParseTree> ruleTokens = Trees.findAllTokenNodes(context, ANTLRParser.RULE_REF);
-					if (lexerAltNode != null &&
-							!ruleTokens.isEmpty())
-					{
-						TerminalNode token = (TerminalNode) ruleTokens.iterator().next();
-						errMgr.grammarError(ErrorType.PARSER_RULE_REF_IN_LEXER_RULE,
-								fileName, token.getSymbol(), token.getText(), lexerAltNode.TOKEN_REF().getText());
-					}
-				}
-
-				@Override
-				public void reportAmbiguity(Parser recognizer, DFA dfa, int startIndex, int stopIndex, boolean exact, BitSet ambigAlts, ATNConfigSet configs) {
-
-				}
-
-				@Override
-				public void reportAttemptingFullContext(Parser recognizer, DFA dfa, int startIndex, int stopIndex, BitSet conflictingAlts, ATNConfigSet configs) {
-
-				}
-
-				@Override
-				public void reportContextSensitivity(Parser recognizer, DFA dfa, int startIndex, int stopIndex, int prediction, ATNConfigSet configs) {
-
-				}
-			};
 			ToolANTLRLexer lexer = new ToolANTLRLexer(in, this);
-			lexer.addErrorListener(errorListener);
 			CommonTokenStream tokens = new CommonTokenStream(lexer);
 			ToolANTLRParser p = new ToolANTLRParser(tokens, this);
-			p.removeErrorListeners();
-			p.addErrorListener(errorListener);
 			ANTLRParser.GrammarSpecContext r = p.grammarSpec();
-			GrammarTreeVisitor listener = new GrammarTreeVisitor();
+			GrammarTreeVisitor listener = new GrammarTreeVisitor(p);
 			ParseTreeWalker.DEFAULT.walk(listener, r);
 			GrammarRootAST root = listener.getTree();
-			root.hasErrors = lexer.getNumberOfSyntaxErrors() > 0 || p.getNumberOfSyntaxErrors() > 0;
 			if (grammarOptions != null) {
 				root.cmdLineOptions = grammarOptions;
 			}

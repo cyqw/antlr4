@@ -7,6 +7,7 @@
 package org.antlr.v4.tool.ast;
 
 import org.antlr.v4.parse.ANTLRParser;
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenStream;
 
@@ -28,13 +29,26 @@ public class GrammarRootAST extends GrammarASTWithOptions {
 
 	//TODO: TBD which item is need when two tokenVocabs in options
 	public ANTLRParser.OptionValueContext tokenVocab;
-	private List<ANTLRParser.LexerRuleSpecContext> lexerRules = new ArrayList<>();
-	private List<ANTLRParser.ParserRuleSpecContext> parserRules = new ArrayList<>();
+
 	public boolean hasErrors;
 	/** Track stream used to create this tree */
 
 	public Map<String, String> cmdLineOptions; // -DsuperClass=T on command line
 	public String fileName;
+	private List<ANTLRParser.LexerRuleSpecContext> lexerRules = new ArrayList<>();
+	private List<ANTLRParser.ParserRuleSpecContext> parserRules = new ArrayList<>();
+
+	public List<ANTLRParser.RulerefContext> getRuleRefs() {
+		return ruleRefs;
+	}
+
+	public List<ANTLRParser.TerminalContext> getTokenRefs() {
+		return tokenRefs;
+	}
+
+	private List<ANTLRParser.RulerefContext> ruleRefs = new ArrayList<>();
+	private List<ANTLRParser.TerminalContext> tokenRefs = new ArrayList<>();
+	private List<ParserRuleContext> errorContexts;
 
 	public GrammarRootAST(GrammarRootAST node) {
 		super(node);
@@ -101,6 +115,22 @@ public class GrammarRootAST extends GrammarASTWithOptions {
 		List<RuleAST> rules = lexerRules.stream().map(RuleAST::new).collect(Collectors.toList());
 		parserRules.stream().map(RuleAST::new).forEach(rules::add);
 		return rules;
+	}
+
+	public void addTokenRef(ANTLRParser.TerminalContext ctx) {
+		this.tokenRefs.add(ctx);
+	}
+
+	public void addRuleRef(ANTLRParser.RulerefContext ctx) {
+		this.ruleRefs.add(ctx);
+	}
+
+	public List<ParserRuleContext> getErrorContexts() {
+		return this.errorContexts;
+	}
+
+	public void setErrorContexts(List<ParserRuleContext> errorContexts) {
+		this.errorContexts = errorContexts;
 	}
 
 //	@Override

@@ -13,13 +13,18 @@ public class GrammarTreeVisitor extends ANTLRParserBaseListener{
 	public int currentOuterAltNumber = 1; // 1..n
 
 	private GrammarRootAST root ;
+	private ToolANTLRParser parser;
 
 	public GrammarTreeVisitor(TreeNodeStream input) {
 		super();
 	}
 
-	public GrammarTreeVisitor() {
+	public GrammarTreeVisitor(ToolANTLRParser parser) {
 
+		this.parser = parser;
+	}
+
+	public GrammarTreeVisitor() {
 	}
 
 
@@ -43,6 +48,7 @@ public class GrammarTreeVisitor extends ANTLRParserBaseListener{
 	}
 
 	public GrammarRootAST getTree() {
+		root.setErrorContexts(parser.getErrorContexts());
 		return root;
 	}
 
@@ -83,5 +89,17 @@ public class GrammarTreeVisitor extends ANTLRParserBaseListener{
 	public void enterParserRuleSpec(ANTLRParser.ParserRuleSpecContext ctx) {
 		root.addParserRule(ctx);
 		super.enterParserRuleSpec(ctx);
+	}
+
+	@Override
+	public void enterRuleref(ANTLRParser.RulerefContext ctx) {
+		root.addRuleRef(ctx);
+		super.enterRuleref(ctx);
+	}
+
+	@Override
+	public void enterTerminal(ANTLRParser.TerminalContext ctx) {
+		root.addTokenRef(ctx);
+		super.enterTerminal(ctx);
 	}
 }
