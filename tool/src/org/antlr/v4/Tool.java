@@ -14,19 +14,29 @@ import org.antlr.v4.codegen.CodeGenPipeline;
 import org.antlr.v4.codegen.CodeGenerator;
 import org.antlr.v4.misc.Graph;
 import org.antlr.v4.parse.ANTLRParser;
+import org.antlr.v4.parse.ANTLRParser.LexerRuleSpecContext;
 import org.antlr.v4.parse.GrammarTreeVisitor;
 import org.antlr.v4.parse.ToolANTLRLexer;
 import org.antlr.v4.parse.ToolANTLRParser;
+import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.Parser;
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.RuntimeMetaData;
+import org.antlr.v4.runtime.atn.ATNConfigSet;
 import org.antlr.v4.runtime.atn.ATNSerializer;
+import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.misc.IntegerList;
 import org.antlr.v4.runtime.misc.LogManager;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.antlr.v4.runtime.tree.TerminalNode;
+import org.antlr.v4.runtime.tree.Trees;
 import org.antlr.v4.semantics.SemanticPipeline;
 import org.antlr.v4.tool.ANTLRMessage;
 import org.antlr.v4.tool.ANTLRToolListener;
@@ -58,6 +68,8 @@ import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.BitSet;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -337,27 +349,6 @@ public class Tool {
 		GrammarTransformPipeline transform = new GrammarTransformPipeline(g, this);
 		transform.process();
 
-		LexerGrammar lexerg;
-		GrammarRootAST lexerAST;
-		if ( g.ast!=null && g.ast.grammarType== ANTLRParser.COMBINED &&
-			 !g.ast.hasErrors )
-		{
-			lexerAST = transform.extractImplicitLexer(g); // alters g.ast
-			if ( lexerAST!=null ) {
-				if (grammarOptions != null) {
-					lexerAST.cmdLineOptions = grammarOptions;
-				}
-
-				lexerg = new LexerGrammar(this, lexerAST);
-				lexerg.fileName = g.fileName;
-				lexerg.originalGrammar = g;
-				g.implicitLexer = lexerg;
-				lexerg.implicitLexerOwner = g;
-				processNonCombinedGrammar(lexerg, gencode);
-//				System.out.println("lexer tokens="+lexerg.tokenNameToTypeMap);
-//				System.out.println("lexer strings="+lexerg.stringLiteralToTypeMap);
-			}
-		}
 		if ( g.implicitLexer!=null ) g.importVocab(g.implicitLexer);
 //		System.out.println("tokens="+g.tokenNameToTypeMap);
 //		System.out.println("strings="+g.stringLiteralToTypeMap);
@@ -463,14 +454,7 @@ public class Tool {
 			public void ruleRef(GrammarAST ref, ActionAST arg) {
 				RuleAST ruleAST = ruleToAST.get(ref.getText());
 				String fileName = ref.getToken().getInputStream().getSourceName();
-				if (Character.isUpperCase(currentRuleName.charAt(0)) &&
-					Character.isLowerCase(ref.getText().charAt(0)))
-				{
-					badref = true;
-					errMgr.grammarError(ErrorType.PARSER_RULE_REF_IN_LEXER_RULE,
-										fileName, ref.getToken(), ref.getText(), currentRuleName);
-				}
-				else if ( ruleAST==null ) {
+				if ( ruleAST==null ) {
 					badref = true;
 					errMgr.grammarError(ErrorType.UNDEFINED_RULE_REF,
 										fileName, ref.token, ref.getText());
@@ -478,6 +462,10 @@ public class Tool {
 			}
 			@Override
 			public ErrorManager getErrorManager() { return errMgr; }
+
+			public void check() {
+
+			}
 		}
 
 		UndefChecker chk = new UndefChecker();
@@ -631,9 +619,43 @@ public class Tool {
 
 	public GrammarRootAST parse(String fileName, CharStream in) {
 		try {
+			ANTLRErrorListener errorListener = new ANTLRErrorListener() {
+
+				@Override
+				public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
+					ParserRuleContext context = ((Parser)recognizer).getContext();
+					LexerRuleSpecContext lexerAltNode = Trees.getParent(context, LexerRuleSpecContext.class);
+					Collection<ParseTree> ruleTokens = Trees.findAllTokenNodes(context, ANTLRParser.RULE_REF);
+					if (lexerAltNode != null &&
+							!ruleTokens.isEmpty())
+					{
+						TerminalNode token = (TerminalNode) ruleTokens.iterator().next();
+						errMgr.grammarError(ErrorType.PARSER_RULE_REF_IN_LEXER_RULE,
+								fileName, token.getSymbol(), token.getText(), lexerAltNode.TOKEN_REF().getText());
+					}
+				}
+
+				@Override
+				public void reportAmbiguity(Parser recognizer, DFA dfa, int startIndex, int stopIndex, boolean exact, BitSet ambigAlts, ATNConfigSet configs) {
+
+				}
+
+				@Override
+				public void reportAttemptingFullContext(Parser recognizer, DFA dfa, int startIndex, int stopIndex, BitSet conflictingAlts, ATNConfigSet configs) {
+
+				}
+
+				@Override
+				public void reportContextSensitivity(Parser recognizer, DFA dfa, int startIndex, int stopIndex, int prediction, ATNConfigSet configs) {
+
+				}
+			};
 			ToolANTLRLexer lexer = new ToolANTLRLexer(in, this);
+			lexer.addErrorListener(errorListener);
 			CommonTokenStream tokens = new CommonTokenStream(lexer);
 			ToolANTLRParser p = new ToolANTLRParser(tokens, this);
+			p.removeErrorListeners();
+			p.addErrorListener(errorListener);
 			ANTLRParser.GrammarSpecContext r = p.grammarSpec();
 			GrammarTreeVisitor listener = new GrammarTreeVisitor();
 			ParseTreeWalker.DEFAULT.walk(listener, r);

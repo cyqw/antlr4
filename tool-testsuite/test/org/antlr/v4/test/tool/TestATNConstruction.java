@@ -559,9 +559,9 @@ public class TestATNConstruction {
 			tool.addListener(errorQueue);
 			assertEquals(0, errorQueue.size());
 			GrammarRootAST grammarRootAST = tool.parseGrammarFromString(gstr);
-			assertEquals(0, errorQueue.size());
+			assertEquals(1, errorQueue.size());
 			Grammar g = tool.createGrammar(grammarRootAST);
-			assertEquals(0, errorQueue.size());
+			assertEquals(1, errorQueue.size());
 			g.fileName = "<string>";
 			tool.process(g, false);
 		}
