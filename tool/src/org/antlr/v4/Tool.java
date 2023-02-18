@@ -13,6 +13,7 @@ import org.antlr.v4.automata.ParserATNFactory;
 import org.antlr.v4.codegen.CodeGenPipeline;
 import org.antlr.v4.codegen.CodeGenerator;
 import org.antlr.v4.misc.Graph;
+import org.antlr.v4.misc.Utils;
 import org.antlr.v4.parse.ANTLRParser;
 import org.antlr.v4.parse.GrammarTreeVisitor;
 import org.antlr.v4.parse.ToolANTLRLexer;
@@ -457,7 +458,7 @@ public class Tool {
 			}
 
 			private void dealErrorNode(ParserRuleContext context) {
-				ANTLRParser.LexerRuleSpecContext lexerRuleNode = Trees.getParent(context, ANTLRParser.LexerRuleSpecContext.class);
+				ANTLRParser.LexerRuleSpecContext lexerRuleNode = Utils.getParent(context, ANTLRParser.LexerRuleSpecContext.class);
 				Collection<ParseTree> ruleTokens = Trees.findAllTokenNodes(context, ANTLRParser.RULE_REF);
 				if (lexerRuleNode != null &&
 						!ruleTokens.isEmpty())

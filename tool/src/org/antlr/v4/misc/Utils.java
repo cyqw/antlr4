@@ -6,19 +6,55 @@
 
 package org.antlr.v4.misc;
 
+import org.antlr.v4.parse.ANTLRParser.LexerRuleSpecContext;
+import org.antlr.v4.parse.ANTLRParser.ParserRuleSpecContext;
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.IntegerList;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.Trees;
 import org.antlr.v4.tool.ast.GrammarAST;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.TreeMap;
 
 /** */
 public class Utils {
 	public static final int INTEGER_POOL_MAX_VALUE = 1000;
 
+	public static String getRuleName(ParserRuleContext node) {
+		LexerRuleSpecContext lexerRule = getParent(node, LexerRuleSpecContext.class);
+		if (lexerRule != null) {
+			return lexerRule.TOKEN_REF().getText();
+		} else {
+			ParserRuleSpecContext parserRule = getParent(node, ParserRuleSpecContext.class);
+			if (parserRule != null) {
+				return parserRule.RULE_REF().getText();
+			}
+		}
+		return null;
+	}
+
+	public static <T> T getParent(ParseTree node, Class<T> typeClass) {
+		ParseTree parent = node.getParent();
+		while (parent != null) {
+			if (parent.getClass().equals(typeClass)) {
+				return (T)parent;
+			}
+			parent = parent.getParent();
+		}
+		return null;
+	}
+
+	public static <T> T getFirstFirstChildWithType(ParseTree node, Class<T> typeClass) {
+		return (T)Trees.findNodeSuchThat(node, it -> it.getClass().equals(typeClass));
+	}
 	public interface Filter<T> {
 		boolean select(T t);
 	}

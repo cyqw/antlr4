@@ -10,6 +10,7 @@ import org.antlr.v4.parse.ANTLRParser;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenStream;
+import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,7 +24,7 @@ public class GrammarRootAST extends GrammarASTWithOptions {
 		defaultOptions.put("language","Java");
 	}
 
-	private ANTLRParser.GrammarSpecContext root;
+	public ANTLRParser.GrammarSpecContext root;
 
 	public int grammarType; // LEXER, PARSER, GRAMMAR (combined)
 
@@ -37,6 +38,11 @@ public class GrammarRootAST extends GrammarASTWithOptions {
 	public String fileName;
 	private List<ANTLRParser.LexerRuleSpecContext> lexerRules = new ArrayList<>();
 	private List<ANTLRParser.ParserRuleSpecContext> parserRules = new ArrayList<>();
+	private List<ANTLRParser.LexerCommandContext> lexerCommands = new ArrayList<>();
+
+	private List<ANTLRParser.OptionsSpecContext> optionsSpecs = new ArrayList<>();
+	private List<ANTLRParser.DelegateGrammarsContext> importSpecs = new ArrayList<>();
+	private List<ANTLRParser.TokensSpecContext> tokensSpecs = new ArrayList<>();
 
 	public List<ANTLRParser.RulerefContext> getRuleRefs() {
 		return ruleRefs;
@@ -86,7 +92,14 @@ public class GrammarRootAST extends GrammarASTWithOptions {
 	}
 
 	public String getGrammarName() {
-		return root.grammarDecl().identifier().getText();
+		return getGrammarNameToken().getText();
+	}
+
+	public Token getGrammarNameToken() {
+		ANTLRParser.IdentifierContext identifier = root.grammarDecl().identifier();
+		TerminalNode ruleRef = identifier.RULE_REF();
+		TerminalNode terminalNode = ruleRef != null ? ruleRef : identifier.TOKEN_REF();
+		return terminalNode.getSymbol();
 	}
 
 	@Override
@@ -131,6 +144,38 @@ public class GrammarRootAST extends GrammarASTWithOptions {
 
 	public void setErrorContexts(List<ParserRuleContext> errorContexts) {
 		this.errorContexts = errorContexts;
+	}
+
+	public void addLexerCommand(ANTLRParser.LexerCommandContext ctx) {
+		this.lexerCommands.add(ctx);
+	}
+
+	public List<ANTLRParser.LexerCommandContext> getLexerCommands() {
+		return this.lexerCommands;
+	}
+
+	public Token getGrammarId() {
+		return null;
+	}
+
+	public List<ANTLRParser.OptionsSpecContext> getOptionsSpecs() {
+		return optionsSpecs;
+	}
+
+	public List<ANTLRParser.DelegateGrammarsContext> getImportsSpecs() {
+		return importSpecs;
+	}
+
+	public List<ANTLRParser.TokensSpecContext> getTokensSpecs() {
+		return tokensSpecs;
+	}
+
+	public void addOptionsSpec(ANTLRParser.OptionsSpecContext ctx) {
+		this.optionsSpecs.add(ctx);
+	}
+
+	public void addTokensSpec(ANTLRParser.TokensSpecContext ctx) {
+		this.tokensSpecs.add(ctx);
 	}
 
 //	@Override

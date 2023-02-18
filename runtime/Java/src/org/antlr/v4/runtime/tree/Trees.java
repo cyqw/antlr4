@@ -260,17 +260,6 @@ public class Trees {
 		return null;
 	}
 
-	public static <T> T getParent(ParseTree node, Class<T> ruleId) {
-		ParseTree parent = node.getParent();
-		while (parent != null) {
-			if (parent.getClass().equals(ruleId)) {
-				return (T)parent;
-			}
-			parent = parent.getParent();
-		}
-		return null;
-	}
-
 	private Trees() {
 	}
 }

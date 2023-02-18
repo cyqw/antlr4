@@ -102,4 +102,22 @@ public class GrammarTreeVisitor extends ANTLRParserBaseListener{
 		root.addTokenRef(ctx);
 		super.enterTerminal(ctx);
 	}
+
+	@Override
+	public void enterLexerCommand(ANTLRParser.LexerCommandContext ctx) {
+		root.addLexerCommand(ctx);
+		super.enterLexerCommand(ctx);
+	}
+
+	@Override
+	public void enterOptionsSpec(ANTLRParser.OptionsSpecContext ctx) {
+		root.addOptionsSpec(ctx);
+		super.enterOptionsSpec(ctx);
+	}
+
+	@Override
+	public void enterTokensSpec(ANTLRParser.TokensSpecContext ctx) {
+		root.addTokensSpec(ctx);
+		super.enterTokensSpec(ctx);
+	}
 }
