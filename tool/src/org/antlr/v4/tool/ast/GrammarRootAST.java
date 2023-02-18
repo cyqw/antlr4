@@ -10,13 +10,13 @@ import org.antlr.v4.parse.ANTLRParser;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenStream;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class GrammarRootAST extends GrammarASTWithOptions {
 	public static final Map<String, String> defaultOptions = new HashMap<String, String>();
@@ -36,6 +36,8 @@ public class GrammarRootAST extends GrammarASTWithOptions {
 
 	public Map<String, String> cmdLineOptions; // -DsuperClass=T on command line
 	public String fileName;
+
+	private List<ParseTree> rules = new ArrayList<>();
 	private List<ANTLRParser.LexerRuleSpecContext> lexerRules = new ArrayList<>();
 	private List<ANTLRParser.ParserRuleSpecContext> parserRules = new ArrayList<>();
 	private List<ANTLRParser.LexerCommandContext> lexerCommands = new ArrayList<>();
@@ -43,7 +45,7 @@ public class GrammarRootAST extends GrammarASTWithOptions {
 	private List<ANTLRParser.OptionsSpecContext> optionsSpecs = new ArrayList<>();
 	private List<ANTLRParser.DelegateGrammarsContext> importSpecs = new ArrayList<>();
 	private List<ANTLRParser.TokensSpecContext> tokensSpecs = new ArrayList<>();
-
+	private Map<TerminalNode,List<ANTLRParser.LexerRuleSpecContext>> modes = new HashMap<>();
 	public List<ANTLRParser.RulerefContext> getRuleRefs() {
 		return ruleRefs;
 	}
@@ -119,15 +121,28 @@ public class GrammarRootAST extends GrammarASTWithOptions {
 
 	public void addParserRule(ANTLRParser.ParserRuleSpecContext rule) {
 		parserRules.add(rule);
+		rules.add(rule);
 	}
-	public void addLexerRule(ANTLRParser.LexerRuleSpecContext rule) {
+	public void addLexerRule(TerminalNode currentModeToken, ANTLRParser.LexerRuleSpecContext rule) {
 		lexerRules.add(rule);
+		rules.add(rule);
+		if (currentModeToken != null) {
+			if (rule.FRAGMENT() != null) {
+				modes.get(currentModeToken).add(rule);
+			}
+		}
 	}
 
-	public List<RuleAST> getRules() {
-		List<RuleAST> rules = lexerRules.stream().map(RuleAST::new).collect(Collectors.toList());
-		parserRules.stream().map(RuleAST::new).forEach(rules::add);
+	public List<ParseTree> getRules() {
 		return rules;
+	}
+
+	public List<ANTLRParser.LexerRuleSpecContext> getLexerRules() {
+		return lexerRules;
+	}
+
+	public List<ANTLRParser.ParserRuleSpecContext> getParserRules() {
+		return parserRules;
 	}
 
 	public void addTokenRef(ANTLRParser.TerminalContext ctx) {
@@ -178,6 +193,14 @@ public class GrammarRootAST extends GrammarASTWithOptions {
 		this.tokensSpecs.add(ctx);
 	}
 
-//	@Override
+	public void addMode(TerminalNode currentModeName) {
+		this.modes.put(currentModeName, new ArrayList<>());
+	}
+
+	public Map<TerminalNode, List<ANTLRParser.LexerRuleSpecContext>> getModes() {
+		return modes;
+	}
+
+	//	@Override
 //	public GrammarRootAST dupNode() { return new GrammarRootAST(this); }
 }

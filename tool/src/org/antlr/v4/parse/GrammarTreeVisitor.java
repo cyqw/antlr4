@@ -1,6 +1,8 @@
 package org.antlr.v4.parse;
 
 import org.antlr.v4.codegen.model.TreeNodeStream;
+import org.antlr.v4.runtime.tree.TerminalNode;
+import org.antlr.v4.runtime.tree.Trees;
 import org.antlr.v4.tool.ErrorManager;
 import org.antlr.v4.tool.ast.ActionAST;
 import org.antlr.v4.tool.ast.GrammarAST;
@@ -14,6 +16,7 @@ public class GrammarTreeVisitor extends ANTLRParserBaseListener{
 
 	private GrammarRootAST root ;
 	private ToolANTLRParser parser;
+	private TerminalNode currentModeToken;
 
 	public GrammarTreeVisitor(TreeNodeStream input) {
 		super();
@@ -81,7 +84,7 @@ public class GrammarTreeVisitor extends ANTLRParserBaseListener{
 
 	@Override
 	public void enterLexerRuleSpec(ANTLRParser.LexerRuleSpecContext ctx) {
-		root.addLexerRule(ctx);
+		root.addLexerRule(currentModeToken, ctx);
 		super.enterLexerRuleSpec(ctx);
 	}
 
@@ -119,5 +122,13 @@ public class GrammarTreeVisitor extends ANTLRParserBaseListener{
 	public void enterTokensSpec(ANTLRParser.TokensSpecContext ctx) {
 		root.addTokensSpec(ctx);
 		super.enterTokensSpec(ctx);
+	}
+
+	@Override
+	public void enterModeSpec(ANTLRParser.ModeSpecContext ctx) {
+		TerminalNode token = (TerminalNode) Trees.findNodeSuchThat(ctx.identifier(), TerminalNode.class::isInstance);
+		currentModeToken = token;
+		root.addMode(token);
+		super.enterModeSpec(ctx);
 	}
 }

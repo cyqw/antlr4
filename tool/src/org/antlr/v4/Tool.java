@@ -25,7 +25,6 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.RuntimeMetaData;
-import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.atn.ATNSerializer;
 import org.antlr.v4.runtime.misc.IntegerList;
 import org.antlr.v4.runtime.misc.LogManager;
@@ -48,7 +47,6 @@ import org.antlr.v4.tool.Rule;
 import org.antlr.v4.tool.ast.GrammarAST;
 import org.antlr.v4.tool.ast.GrammarASTErrorNode;
 import org.antlr.v4.tool.ast.GrammarRootAST;
-import org.antlr.v4.tool.ast.RuleAST;
 import org.stringtemplate.v4.STGroup;
 
 import java.io.BufferedWriter;
@@ -408,22 +406,22 @@ public class Tool {
 	 */
 	public boolean checkForRuleIssues(final Grammar g) {
 		// check for redefined rules
-		List<RuleAST> rules = g.ast.getRules();
+		List<ParseTree> rules = g.ast.getRules();
 
 
 		boolean redefinition = false;
-		final Map<String, RuleAST> ruleToAST = new HashMap<>();
-		for (RuleAST ruleAST : rules) {
-			GrammarAST ID = ruleAST.getChild(0);
+		final Map<String, ParseTree> ruleToAST = new HashMap<>();
+		for (ParseTree ruleAST : rules) {
+			TerminalNode ID = (TerminalNode)Trees.findNodeSuchThat(ruleAST, TerminalNode.class::isInstance);
 			String ruleName = ID.getText();
-			RuleAST prev = ruleToAST.get(ruleName);
+			ParseTree prev = ruleToAST.get(ruleName);
 			if ( prev !=null ) {
-				GrammarAST prevChild = prev.getChild(0);
+				TerminalNode prevChild = (TerminalNode)Trees.findNodeSuchThat(prev, TerminalNode.class::isInstance);
 				g.tool.errMgr.grammarError(ErrorType.RULE_REDEFINITION,
 										   g.fileName,
-										   ID.getToken(),
+										   ID.getSymbol(),
 										   ruleName,
-										   prevChild.getToken().getLine());
+										   prevChild.getSymbol().getLine());
 				redefinition = true;
 				continue;
 			}
@@ -442,12 +440,12 @@ public class Tool {
 				if ( g.isLexer() ) ruleRef(ref);
 			}
 			public void ruleRef(TerminalNode ref) {
-				RuleAST ruleAST = ruleToAST.get(ref.getText());
+				ParseTree ruleAST = ruleToAST.get(ref.getText());
 				String fileName = g.fileName;
 				if ( ruleAST==null ) {
 					badref = true;
 					errMgr.grammarError(ErrorType.UNDEFINED_RULE_REF,
-										fileName, (Token) ref.getPayload(), ref.getText());
+										fileName, ref.getSymbol(), ref.getText());
 				}
 			}
 

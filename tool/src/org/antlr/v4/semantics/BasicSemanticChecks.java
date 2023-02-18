@@ -10,8 +10,8 @@ import org.antlr.v4.misc.Utils;
 import org.antlr.v4.parse.ANTLRParser;
 import org.antlr.v4.parse.GrammarTreeVisitor;
 import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
-import org.antlr.v4.runtime.tree.Tree;
 import org.antlr.v4.runtime.tree.Trees;
 import org.antlr.v4.tool.ErrorManager;
 import org.antlr.v4.tool.ErrorType;
@@ -89,11 +89,6 @@ public class BasicSemanticChecks extends GrammarTreeVisitor {
 	 */
 	public boolean checkAssocElementOption = true;
 
-	/**
-	 * This field is used for reporting the {@link ErrorType#MODE_WITHOUT_RULES}
-	 * error when necessary.
-	 */
-	protected int nonFragmentRuleCount;
 
 	/**
 	 * This is {@code true} from the time {@link #discoverLexerRule} is called
@@ -118,15 +113,40 @@ public class BasicSemanticChecks extends GrammarTreeVisitor {
 
 	public void process() {
 		g.ast.getLexerCommands().forEach(this::checkLexerCommand);
-		discoverGrammar(g.ast, g.ast.getGrammarNameToken());
+		checkGrammarName(g.ast.getGrammarNameToken());
 		finishPrequels(g.ast);
-		visitGrammar(g.ast); }
+		g.ast.getModes().forEach((modeNameNode, tokenRules) -> {
+			checkModeRulesNotEmpty(modeNameNode, tokenRules);
+			checkModeNotInLexer(modeNameNode);
+		});
+		g.ast.getLexerRules().forEach(it -> checkInvalidRuleDef(it.TOKEN_REF().getSymbol()));
+		g.ast.getParserRules().forEach(it -> {
+			checkInvalidRuleDef(it.RULE_REF().getSymbol());
+		});
+		g.ast.getRuleRefs().forEach(it -> checkInvalidRuleRef(it.RULE_REF().getSymbol()));
+		g.ast.getOptionsSpecs().forEach(this::checkOptions);
+
+		visitGrammar(g.ast);
+		discoverRules(g.ast.getRules());
+	}
+
+	private void checkOptions(ANTLRParser.OptionsSpecContext options) {
+		options.option().forEach(it -> {
+			if (Utils.getParent(options, ANTLRParser.LexerRuleSpecContext.class) != null) {
+				ruleOption(getFirstTokenNode(it.identifier()), getFirstTokenNode(it.optionValue()));
+			} else if (Utils.getParent(options, ANTLRParser.LexerRuleSpecContext.class) != null) {
+				blockOption(getFirstTokenNode(it.identifier()), getFirstTokenNode(it.optionValue()));
+			} else {
+				grammarOption(getFirstTokenNode(it.identifier()), getFirstTokenNode(it.optionValue()));
+			}
+		});
+	}
+
+	private static TerminalNode getFirstTokenNode(ParseTree node) {
+		return (TerminalNode) Trees.findNodeSuchThat(node, TerminalNode.class::isInstance);
+	}
 
 	// Routines to route visitor traffic to the checking routines
-
-	public void discoverGrammar(GrammarRootAST root, Token token) {
-		checkGrammarName(token);
-	}
 
 	public void finishPrequels(GrammarRootAST grammar) {
 		List<ANTLRParser.OptionsSpecContext> options = grammar.getOptionsSpecs();
@@ -138,81 +158,28 @@ public class BasicSemanticChecks extends GrammarTreeVisitor {
 
 	public void importGrammar(ANTLRParser.DelegateGrammarsContext importRules) {
 		for (ANTLRParser.DelegateGrammarContext importRule : importRules.delegateGrammar()) {
-			TerminalNode id = (TerminalNode)Trees.findNodeSuchThat(importRule, TerminalNode.class::isInstance);
+			TerminalNode id = getFirstTokenNode(importRule);
 			checkImport(id.getSymbol());
 		}
 	}
 
-	@Override
-	public void discoverRules(GrammarAST rules) {
+	public void discoverRules(List<ParseTree> rules) {
 		checkNumRules(rules);
 	}
 
-	@Override
-	protected void enterMode(GrammarAST tree) {
-		nonFragmentRuleCount = 0;
-	}
+	protected void checkModeRulesNotEmpty(TerminalNode modeNameNode, List<ANTLRParser.LexerRuleSpecContext> tokenRules) {
+		if (tokenRules.size() == 0) {
+			String name = modeNameNode.getText();
 
-	@Override
-	protected void exitMode(GrammarAST tree) {
-		if (nonFragmentRuleCount == 0) {
-			Token token = tree.getToken();
-			String name = "?";
-			if (tree.getChildCount() > 0) {
-				name = tree.getChild(0).getText();
-				if (name == null || name.isEmpty()) {
-					name = "?";
-				}
-
-				token = ((GrammarAST)tree.getChild(0)).getToken();
-			}
-
-			g.tool.errMgr.grammarError(ErrorType.MODE_WITHOUT_RULES, g.fileName, token, name, g);
+			g.tool.errMgr.grammarError(ErrorType.MODE_WITHOUT_RULES, g.fileName, modeNameNode.getSymbol(), name, g);
 		}
 	}
 
-	@Override
-	public void modeDef(GrammarAST m, GrammarAST ID) {
+	public void checkModeNotInLexer(TerminalNode modeNode) {
 		if ( !g.isLexer() ) {
 			g.tool.errMgr.grammarError(ErrorType.MODE_NOT_IN_LEXER, g.fileName,
-									   ID.token, ID.token.getText(), g);
+									   modeNode.getSymbol(), modeNode.getText(), g);
 		}
-	}
-
-	@Override
-	public void discoverRule(RuleAST rule, GrammarAST ID,
-							 List<GrammarAST> modifiers,
-							 ActionAST arg, ActionAST returns,
-							 GrammarAST thrws, GrammarAST options,
-							 ActionAST locals,
-							 List<GrammarAST> actions, GrammarAST block)
-	{
-		// TODO: chk that all or no alts have "# label"
-		checkInvalidRuleDef(ID.token);
-	}
-
-	@Override
-	public void discoverLexerRule(RuleAST rule, GrammarAST ID, List<GrammarAST> modifiers, GrammarAST options,
-								  GrammarAST block)
-	{
-		checkInvalidRuleDef(ID.token);
-
-		if (modifiers != null) {
-			for (GrammarAST tree : modifiers) {
-				if (tree.getType() == ANTLRParser.FRAGMENT) {
-					inFragmentRule = true;
-				}
-			}
-		}
-
-		if (!inFragmentRule) {
-			nonFragmentRuleCount++;
-		}
-	}
-
-	@Override
-	protected void exitLexerRule(GrammarAST tree) {
-		inFragmentRule = false;
 	}
 
 	@Override
@@ -220,19 +187,16 @@ public class BasicSemanticChecks extends GrammarTreeVisitor {
 		checkInvalidRuleRef(ref.token);
 	}
 
-	@Override
-	public void grammarOption(GrammarAST ID, GrammarAST valueAST) {
-		checkOptions(g.ast, ID.token, valueAST);
+	public void grammarOption(TerminalNode ID, TerminalNode valueAST) {
+		checkOptions(ANTLRParser.GRAMMAR, ID.getSymbol(), valueAST);
 	}
 
-	@Override
-	public void ruleOption(GrammarAST ID, GrammarAST valueAST) {
-		checkOptions((GrammarAST)ID.getAncestor(RULE), ID.token, valueAST);
+	public void ruleOption(TerminalNode ID, TerminalNode valueAST) {
+		checkOptions(ANTLRParser.RULE, ID.getSymbol(), valueAST);
 	}
 
-	@Override
-	public void blockOption(GrammarAST ID, GrammarAST valueAST) {
-		checkOptions((GrammarAST)ID.getAncestor(BLOCK), ID.token, valueAST);
+	public void blockOption(TerminalNode ID, TerminalNode valueAST) {
+		checkOptions(ANTLRParser.BLOCK, ID.getSymbol(), valueAST);
 	}
 
 	@Override
@@ -322,12 +286,10 @@ public class BasicSemanticChecks extends GrammarTreeVisitor {
 		}
 	}
 
-	void checkNumRules(GrammarAST rulesNode) {
-		if ( rulesNode.getChildCount()==0 ) {
-			GrammarAST root = (GrammarAST)rulesNode.getParent();
-			GrammarAST IDNode = (GrammarAST)root.getChild(0);
+	void checkNumRules(List<ParseTree> rulesNode) {
+		if ( rulesNode.size()==0 ) {
 			g.tool.errMgr.grammarError(ErrorType.NO_RULES, g.fileName,
-					null, IDNode.getText(), g);
+					null, g.ast.getGrammarName(), g);
 		}
 	}
 
@@ -337,7 +299,7 @@ public class BasicSemanticChecks extends GrammarTreeVisitor {
 	{
 		List<Token> secondOptionTokens = new ArrayList<Token>();
 		if ( options!=null && options.size()>1 ) {
-			secondOptionTokens.add(options.get(1).OPTIONS().getSymbol());
+			secondOptionTokens.add(options.get(1).().getSymbol());
 		}
 		if ( imports!=null && imports.size()>1 ) {
 			secondOptionTokens.add(imports.get(1).IMPORT().getSymbol());
@@ -467,9 +429,8 @@ public class BasicSemanticChecks extends GrammarTreeVisitor {
 	}
 
 	/** Check option is appropriate for grammar, rule, subrule */
-	void checkOptions(GrammarAST parent, Token optionID, GrammarAST valueAST) {
+	void checkOptions(int parentType, Token optionID, TerminalNode valueAST) {
 		Set<String> optionsToCheck = null;
-		int parentType = parent.getType();
 		switch (parentType) {
 			case ANTLRParser.BLOCK:
 				optionsToCheck = g.isLexer() ? Grammar.lexerBlockOptions : Grammar.parserBlockOptions;
@@ -492,7 +453,7 @@ public class BasicSemanticChecks extends GrammarTreeVisitor {
 		}
 	}
 
-	private void checkCaseInsensitiveOption(Token optionID, GrammarAST valueAST, int parentType) {
+	private void checkCaseInsensitiveOption(Token optionID, TerminalNode valueAST, int parentType) {
 		String optionName = optionID.getText();
 		if (optionName.equals(Grammar.caseInsensitiveOptionName)) {
 			String valueText = valueAST.getText();
@@ -509,7 +470,7 @@ public class BasicSemanticChecks extends GrammarTreeVisitor {
 				}
 			}
 			else {
-				g.tool.errMgr.grammarError(ErrorType.ILLEGAL_OPTION_VALUE, g.fileName, valueAST.getToken(),
+				g.tool.errMgr.grammarError(ErrorType.ILLEGAL_OPTION_VALUE, g.fileName, valueAST.getSymbol(),
 						optionName, valueText);
 			}
 		}
