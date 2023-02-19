@@ -18,14 +18,8 @@ import org.antlr.v4.tool.ErrorType;
 import org.antlr.v4.tool.Grammar;
 import org.antlr.v4.tool.Rule;
 import org.antlr.v4.tool.ast.ActionAST;
-import org.antlr.v4.tool.ast.AltAST;
-import org.antlr.v4.tool.ast.BlockAST;
 import org.antlr.v4.tool.ast.GrammarAST;
-import org.antlr.v4.tool.ast.GrammarASTWithOptions;
 import org.antlr.v4.tool.ast.GrammarRootAST;
-import org.antlr.v4.tool.ast.RuleAST;
-import org.antlr.v4.tool.ast.RuleRefAST;
-import org.antlr.v4.tool.ast.TerminalAST;
 import org.stringtemplate.v4.misc.MultiMap;
 
 import java.io.File;
@@ -119,12 +113,23 @@ public class BasicSemanticChecks extends GrammarTreeVisitor {
 			checkModeRulesNotEmpty(modeNameNode, tokenRules);
 			checkModeNotInLexer(modeNameNode);
 		});
-		g.ast.getLexerRules().forEach(it -> checkInvalidRuleDef(it.TOKEN_REF().getSymbol()));
+		g.ast.getLexerRules().forEach(it -> {
+			checkInvalidRuleDef(it.TOKEN_REF().getSymbol());
+			defineToken(getFirstTokenNode(it.TOKEN_REF()));
+		});
 		g.ast.getParserRules().forEach(it -> {
 			checkInvalidRuleDef(it.RULE_REF().getSymbol());
+			finishRule(it, it.RULE_REF(), it.ruleBlock());
 		});
-		g.ast.getRuleRefs().forEach(it -> checkInvalidRuleRef(it.RULE_REF().getSymbol()));
+		g.ast.getRuleRefs().forEach(it -> ruleRef(it.RULE_REF()));
 		g.ast.getOptionsSpecs().forEach(this::checkOptions);
+		g.ast.getChannels().forEach(it -> {
+			TerminalNode channelToken = it.CHANNELS();
+			enterChannelsSpec(channelToken);
+			defineChannel(channelToken);
+		});
+		g.ast.getActions().forEach(this::actionInAlt);
+		g.ast.getElementOptions().forEach(it -> elementOption(it.getParent(), it.identifier(0), it.identifier(1)));
 
 		visitGrammar(g.ast);
 		discoverRules(g.ast.getRules());
@@ -182,9 +187,8 @@ public class BasicSemanticChecks extends GrammarTreeVisitor {
 		}
 	}
 
-	@Override
-	public void ruleRef(GrammarAST ref, ActionAST arg) {
-		checkInvalidRuleRef(ref.token);
+	public void ruleRef(TerminalNode ref) {
+		checkInvalidRuleRef(ref);
 	}
 
 	public void grammarOption(TerminalNode ID, TerminalNode valueAST) {
@@ -199,70 +203,69 @@ public class BasicSemanticChecks extends GrammarTreeVisitor {
 		checkOptions(ANTLRParser.BLOCK, ID.getSymbol(), valueAST);
 	}
 
-	@Override
-	public void defineToken(GrammarAST ID) {
-		checkTokenDefinition(ID.token);
+	public void defineToken(TerminalNode ID) {
+		checkTokenDefinition(ID.getSymbol());
 	}
 
-	@Override
-	protected void enterChannelsSpec(GrammarAST tree) {
+	protected void enterChannelsSpec(TerminalNode tree) {
 		ErrorType errorType = g.isParser()
 				? ErrorType.CHANNELS_BLOCK_IN_PARSER_GRAMMAR
 				: g.isCombined()
 				? ErrorType.CHANNELS_BLOCK_IN_COMBINED_GRAMMAR
 				: null;
 		if (errorType != null) {
-			g.tool.errMgr.grammarError(errorType, g.fileName, tree.token);
+			g.tool.errMgr.grammarError(errorType, g.fileName, tree.getSymbol());
 		}
 	}
 
-	@Override
-	public void defineChannel(GrammarAST ID) {
-		checkChannelDefinition(ID.token);
+	public void defineChannel(TerminalNode ID) {
+		checkChannelDefinition(ID.getSymbol());
 	}
 
-	@Override
-	public void elementOption(GrammarASTWithOptions elem, GrammarAST ID, GrammarAST valueAST) {
-		checkElementOptions(elem, ID, valueAST);
+	public void elementOption(ParseTree elem, ParseTree ID, ParseTree valueAST) {
+		checkElementOptions(elem, getFirstTokenNode(ID), valueAST);
 	}
 
-	@Override
-	public void finishRule(RuleAST rule, GrammarAST ID, GrammarAST block) {
-		if ( rule.isLexerRule() ) return;
-		BlockAST blk = (BlockAST)rule.getFirstChildWithType(BLOCK);
+	public void finishRule(ANTLRParser.ParserRuleSpecContext rule, TerminalNode ID, ANTLRParser.RuleBlockContext block) {
+		TerminalNode ruleIdNode = rule.RULE_REF();
+		String ruleName = ruleIdNode.getText();
+		ANTLRParser.RuleAltListContext blk = rule.ruleBlock().ruleAltList();//TODO:
 		int nalts = blk.getChildCount();
-		GrammarAST idAST = (GrammarAST)rule.getChild(0);
+//		GrammarAST idAST = rule.getChild(0);
 		for (int i=0; i< nalts; i++) {
-			AltAST altAST = (AltAST)blk.getChild(i);
-			if ( altAST.altLabel!=null ) {
-				String altLabel = altAST.altLabel.getText();
+			ANTLRParser.LabeledAltContext altAST = blk.labeledAlt(i);
+			if ( altAST.identifier()!=null ) {
+				String altLabel = altAST.identifier().getText();
 				// first check that label doesn't conflict with a rule
 				// label X or x can't be rule x.
 				Rule r = ruleCollector.rules.get(Utils.decapitalize(altLabel));
+				TerminalNode labelNode = getFirstTokenNode(altAST.identifier());
 				if ( r!=null ) {
 					g.tool.errMgr.grammarError(ErrorType.ALT_LABEL_CONFLICTS_WITH_RULE,
-											   g.fileName, altAST.altLabel.token,
+											   g.fileName, labelNode.getSymbol(),
 											   altLabel,
 											   r.name);
 				}
 				// Now verify that label X or x doesn't conflict with label
 				// in another rule. altLabelToRuleName has both X and x mapped.
 				String prevRuleForLabel = ruleCollector.altLabelToRuleName.get(altLabel);
-				if ( prevRuleForLabel!=null && !prevRuleForLabel.equals(rule.getRuleName()) ) {
-					g.tool.errMgr.grammarError(ErrorType.ALT_LABEL_REDEF,
-											   g.fileName, altAST.altLabel.token,
-											   altLabel,
-											   rule.getRuleName(),
-											   prevRuleForLabel);
+				if (prevRuleForLabel != null) {
+					if (!prevRuleForLabel.equals(ruleName)) {
+						g.tool.errMgr.grammarError(ErrorType.ALT_LABEL_REDEF,
+								g.fileName, labelNode.getSymbol(),
+								altLabel,
+								ruleName,
+								prevRuleForLabel);
+					}
 				}
 			}
 		}
-		List<GrammarAST> altLabels = ruleCollector.ruleToAltLabels.get(rule.getRuleName());
+		List<GrammarAST> altLabels = ruleCollector.ruleToAltLabels.get(ruleName);
 		int numAltLabels = 0;
 		if ( altLabels!=null ) numAltLabels = altLabels.size();
 		if ( numAltLabels>0 && nalts != numAltLabels ) {
 			g.tool.errMgr.grammarError(ErrorType.RULE_WITH_TOO_FEW_ALT_LABELS,
-									   g.fileName, idAST.token, rule.getRuleName());
+									   g.fileName, ruleIdNode.getSymbol(), ruleName);
 		}
 	}
 
@@ -299,7 +302,7 @@ public class BasicSemanticChecks extends GrammarTreeVisitor {
 	{
 		List<Token> secondOptionTokens = new ArrayList<Token>();
 		if ( options!=null && options.size()>1 ) {
-			secondOptionTokens.add(options.get(1).().getSymbol());
+			secondOptionTokens.add(options.get(1).OPTIONS().getSymbol());
 		}
 		if ( imports!=null && imports.size()>1 ) {
 			secondOptionTokens.add(imports.get(1).IMPORT().getSymbol());
@@ -331,11 +334,12 @@ public class BasicSemanticChecks extends GrammarTreeVisitor {
 		}
 	}
 
-	void checkInvalidRuleRef(Token ruleID) {
-		String fileName = ruleID.getInputStream().getSourceName();
+	void checkInvalidRuleRef(TerminalNode ruleID) {
+		ANTLRParser.ParserRuleSpecContext ruleNode = Utils.getParent(ruleID, ANTLRParser.ParserRuleSpecContext.class);
+		String fileName = ruleID.getSymbol().getInputStream().getSourceName();
 		if ( g.isLexer() && Character.isLowerCase(ruleID.getText().charAt(0)) ) {
 			g.tool.errMgr.grammarError(ErrorType.PARSER_RULE_REF_IN_LEXER_RULE,
-									   fileName, ruleID, ruleID.getText(), currentRuleName);
+									   fileName, ruleID.getSymbol(), ruleID.getText(), ruleNode.RULE_REF().getText());
 		}
 	}
 
@@ -363,7 +367,6 @@ public class BasicSemanticChecks extends GrammarTreeVisitor {
 		}
 	}
 
-	@Override
 	public void actionInAlt(ActionAST action) {
 		if (inFragmentRule) {
 			String fileName = action.token.getInputStream().getSourceName();
@@ -477,13 +480,13 @@ public class BasicSemanticChecks extends GrammarTreeVisitor {
 	}
 
 	/** Check option is appropriate for elem; parent of ID is ELEMENT_OPTIONS */
-	boolean checkElementOptions(GrammarASTWithOptions elem,
-								GrammarAST ID,
-								GrammarAST valueAST)
+	boolean checkElementOptions(ParseTree elem,
+								TerminalNode ID,
+								ParseTree valueAST)
 	{
 		if (checkAssocElementOption && ID != null && "assoc".equals(ID.getText())) {
-			if (elem.getType() != ANTLRParser.ALT) {
-				Token optionID = ID.token;
+			if (!(elem instanceof ANTLRParser.AltListContext)) { // TODO: check elem is ALT type
+				Token optionID = ID.getSymbol();
 				String fileName = optionID.getInputStream().getSourceName();
 				g.tool.errMgr.grammarError(ErrorType.UNRECOGNIZED_ASSOC_OPTION,
 										   fileName,
@@ -492,17 +495,17 @@ public class BasicSemanticChecks extends GrammarTreeVisitor {
 			}
 		}
 
-		if ( elem instanceof RuleRefAST ) {
-			return checkRuleRefOptions((RuleRefAST)elem, ID, valueAST);
+		if ( elem instanceof ANTLRParser.ParserRuleSpecContext ) { //TODO:
+			return checkRuleRefOptions((ANTLRParser.ParserRuleSpecContext)elem, ID, valueAST);
 		}
-		if ( elem instanceof TerminalAST ) {
-			return checkTokenOptions((TerminalAST)elem, ID, valueAST);
+		if ( elem instanceof ANTLRParser.LexerBlockContext ) { //TODO:
+			return checkTokenOptions((ANTLRParser.LexerBlockContext)elem, ID, valueAST);
 		}
-		if ( elem.getType()==ANTLRParser.ACTION ) {
+		if ( elem instanceof  ANTLRParser.Action_Context ) { //TODO:
 			return false;
 		}
-		if ( elem.getType()==ANTLRParser.SEMPRED ) {
-			Token optionID = ID.token;
+		if ( elem instanceof  ANTLRParser.SetElementContext ) { // TODO:
+			Token optionID = ID.getSymbol();
 			String fileName = optionID.getInputStream().getSourceName();
 			if ( valueAST!=null && !Grammar.semPredOptions.contains(optionID.getText()) ) {
 				g.tool.errMgr.grammarError(ErrorType.ILLEGAL_OPTION,
@@ -515,8 +518,8 @@ public class BasicSemanticChecks extends GrammarTreeVisitor {
 		return false;
 	}
 
-	boolean checkRuleRefOptions(RuleRefAST elem, GrammarAST ID, GrammarAST valueAST) {
-		Token optionID = ID.token;
+	boolean checkRuleRefOptions(ANTLRParser.ParserRuleSpecContext elem, TerminalNode ID, ParseTree valueAST) {
+		Token optionID = ID.getSymbol();
 		String fileName = optionID.getInputStream().getSourceName();
 		// don't care about id<SimpleValue> options
 		if ( valueAST!=null && !Grammar.ruleRefOptions.contains(optionID.getText()) ) {
@@ -530,8 +533,8 @@ public class BasicSemanticChecks extends GrammarTreeVisitor {
 		return true;
 	}
 
-	boolean checkTokenOptions(TerminalAST elem, GrammarAST ID, GrammarAST valueAST) {
-		Token optionID = ID.token;
+	boolean checkTokenOptions(ANTLRParser.LexerBlockContext elem, TerminalNode ID, ParseTree valueAST) {
+		Token optionID = ID.getSymbol();
 		String fileName = optionID.getInputStream().getSourceName();
 		// don't care about ID<ASTNodeName> options
 		if ( valueAST!=null && !Grammar.tokenOptions.contains(optionID.getText()) ) {

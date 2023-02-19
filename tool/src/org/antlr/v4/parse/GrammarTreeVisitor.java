@@ -10,7 +10,6 @@ import org.antlr.v4.tool.ast.GrammarRootAST;
 import org.antlr.v4.tool.ast.TerminalAST;
 
 public class GrammarTreeVisitor extends ANTLRParserBaseListener{
-	public String currentRuleName;
 
 	public int currentOuterAltNumber = 1; // 1..n
 
@@ -130,5 +129,17 @@ public class GrammarTreeVisitor extends ANTLRParserBaseListener{
 		currentModeToken = token;
 		root.addMode(token);
 		super.enterModeSpec(ctx);
+	}
+
+	@Override
+	public void enterChannelsSpec(ANTLRParser.ChannelsSpecContext ctx) {
+		root.addChannel(ctx);
+		super.enterChannelsSpec(ctx);
+	}
+
+	@Override
+	public void enterElementOption(ANTLRParser.ElementOptionContext ctx) {
+		root.addElementOption(ctx);
+		super.enterElementOption(ctx);
 	}
 }

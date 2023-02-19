@@ -46,6 +46,10 @@ public class GrammarRootAST extends GrammarASTWithOptions {
 	private List<ANTLRParser.DelegateGrammarsContext> importSpecs = new ArrayList<>();
 	private List<ANTLRParser.TokensSpecContext> tokensSpecs = new ArrayList<>();
 	private Map<TerminalNode,List<ANTLRParser.LexerRuleSpecContext>> modes = new HashMap<>();
+	private List<ANTLRParser.ChannelsSpecContext> channels = new ArrayList<>();
+	private List<ANTLRParser.ElementOptionContext> elementOptions = new ArrayList<>();
+	private List<ANTLRParser.Action_Context> actions = new ArrayList<>();
+
 	public List<ANTLRParser.RulerefContext> getRuleRefs() {
 		return ruleRefs;
 	}
@@ -199,6 +203,26 @@ public class GrammarRootAST extends GrammarASTWithOptions {
 
 	public Map<TerminalNode, List<ANTLRParser.LexerRuleSpecContext>> getModes() {
 		return modes;
+	}
+
+	public void addChannel(ANTLRParser.ChannelsSpecContext ctx) {
+		this.channels.add(ctx);
+	}
+
+	public List<ANTLRParser.ChannelsSpecContext> getChannels() {
+		return channels;
+	}
+
+	public List<ANTLRParser.ElementOptionContext> getElementOptions() {
+		return elementOptions;
+	}
+
+	public void addElementOption(ANTLRParser.ElementOptionContext ctx) {
+		this.elementOptions.add(ctx);
+	}
+
+	public List<ANTLRParser.Action_Context> getActions() {
+		return actions;
 	}
 
 	//	@Override
