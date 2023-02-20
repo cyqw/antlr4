@@ -100,6 +100,12 @@ public class GrammarTreeVisitor extends ANTLRParserBaseListener{
 	}
 
 	@Override
+	public void enterLabeledElement(ANTLRParser.LabeledElementContext ctx) {
+		root.addLabeledElement(ctx);
+		super.enterLabeledElement(ctx);
+	}
+
+	@Override
 	public void enterTerminal(ANTLRParser.TerminalContext ctx) {
 		root.addTokenRef(ctx);
 		super.enterTerminal(ctx);
@@ -141,5 +147,11 @@ public class GrammarTreeVisitor extends ANTLRParserBaseListener{
 	public void enterElementOption(ANTLRParser.ElementOptionContext ctx) {
 		root.addElementOption(ctx);
 		super.enterElementOption(ctx);
+	}
+
+	@Override
+	public void enterActionBlock(ANTLRParser.ActionBlockContext ctx) {
+		root.addActions(ctx);
+		super.enterActionBlock(ctx);
 	}
 }
