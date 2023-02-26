@@ -96,7 +96,7 @@ public class LeftRecursiveRuleTransformer {
 											  String language)
 	{
 		//tool.log("grammar", ruleAST.toStringTree());
-		GrammarAST prevRuleAST = r.ast;
+		RuleAST prevRuleAST = r.ast;
 		String ruleName = prevRuleAST.getChild(0).getText();
 		LeftRecursiveRuleAnalyzer leftRecursiveRuleWalker =
 			new LeftRecursiveRuleAnalyzer(prevRuleAST, tool, ruleName, language);
@@ -125,7 +125,7 @@ public class LeftRecursiveRuleTransformer {
 		((GrammarAST)t.getChild(0)).token = ((GrammarAST)prevRuleAST.getChild(0)).getToken();
 
 		// update grammar AST and set rule's AST.
-//		RULES.setChild(prevRuleAST.getChildIndex(), t);
+		RULES.setChild(prevRuleAST.getChildIndex(), t);
 		r.ast = t;
 
 		// Reduce sets in newly created rule tree
@@ -135,12 +135,12 @@ public class LeftRecursiveRuleTransformer {
 
 		// Rerun semantic checks on the new rule
 		RuleCollector ruleCollector = new RuleCollector(g);
-//		ruleCollector.visit(t, "rule");
+		ruleCollector.visit(t, "rule");
 		BasicSemanticChecks basics = new BasicSemanticChecks(g, ruleCollector);
 		// disable the assoc element option checks because they are already
 		// handled for the pre-transformed rule.
 		basics.checkAssocElementOption = false;
-//		basics.visit(t, "rule");
+		basics.visit(t, "rule");
 
 		// track recursive alt info for codegen
 		r.recPrimaryAlts = new ArrayList<LeftRecursiveRuleAltInfo>();
@@ -161,7 +161,7 @@ public class LeftRecursiveRuleTransformer {
 		// update Rule to just one alt and add prec alt
 		ActionAST arg = (ActionAST)r.ast.getFirstChildWithType(ANTLRParser.ARG_ACTION);
 		if ( arg!=null ) {
-			r.args = ScopeParser.parseTypedArgList(arg, arg.getText(), g);
+			r.args = ScopeParser.parseTypedArgList(arg.getText(), g, arg.ARGUMENT_CONTENT(0).getSymbol());
 			r.args.type = AttributeDict.DictType.ARG;
 			r.args.ast = arg;
 			arg.resolver = r.alt[1]; // todo: isn't this Rule or something?
@@ -192,14 +192,12 @@ public class LeftRecursiveRuleTransformer {
 
 		Token ruleStart = null;
 		try {
-//			ParserRuleReturnScope r = p.rule();
-//			RuleAST tree = (RuleAST)r.getTree();
-//			ruleStart = (Token)r.getStart();
-//			GrammarTransformPipeline.setGrammarPtr(g, tree);
-//			GrammarTransformPipeline.augmentTokensWithOriginalPosition(g, tree);
-//			return tree;
-			//TODO:
-			return null;
+			ParserRuleReturnScope r = p.rule();
+			RuleAST tree = (RuleAST)r.getTree();
+			ruleStart = (Token)r.getStart();
+			GrammarTransformPipeline.setGrammarPtr(g, tree);
+			GrammarTransformPipeline.augmentTokensWithOriginalPosition(g, tree);
+			return tree;
 		}
 		catch (Exception e) {
 			tool.errMgr.toolError(ErrorType.INTERNAL_ERROR,

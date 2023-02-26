@@ -44,8 +44,6 @@ import org.antlr.v4.tool.Grammar;
 import org.antlr.v4.tool.GrammarTransformPipeline;
 import org.antlr.v4.tool.LexerGrammar;
 import org.antlr.v4.tool.Rule;
-import org.antlr.v4.tool.ast.GrammarAST;
-import org.antlr.v4.tool.ast.GrammarASTErrorNode;
 import org.antlr.v4.tool.ast.GrammarRootAST;
 import org.stringtemplate.v4.STGroup;
 
@@ -480,8 +478,8 @@ public class Tool {
 		Graph<String> g = new Graph<String>();
 		List<GrammarRootAST> roots = new ArrayList<GrammarRootAST>();
 		for (String fileName : fileNames) {
-			GrammarAST t = parseGrammar(fileName);
-			if ( t==null || t instanceof GrammarASTErrorNode) continue; // came back as error node
+			GrammarRootAST t = parseGrammar(fileName);
+			if ( t==null) continue; // came back as error node
 			if ( ((GrammarRootAST)t).hasErrors ) continue;
 			GrammarRootAST root = (GrammarRootAST)t;
 			roots.add(root);
@@ -581,7 +579,7 @@ public class Tool {
 	 * @param g
 	 * @param nameNode The node associated with the imported grammar name.
 	 */
-	public Grammar loadImportedGrammar(Grammar g, GrammarAST nameNode) throws IOException {
+	public Grammar loadImportedGrammar(Grammar g, TerminalNode nameNode) throws IOException {
 		String name = nameNode.getText();
 		Grammar imported = importedGrammars.get(name);
 		if (imported == null) {
@@ -595,7 +593,7 @@ public class Tool {
 			}
 
 			if ( importedFile==null ) {
-				errMgr.grammarError(ErrorType.CANNOT_FIND_IMPORTED_GRAMMAR, g.fileName, nameNode.getToken(), name);
+				errMgr.grammarError(ErrorType.CANNOT_FIND_IMPORTED_GRAMMAR, g.fileName, nameNode.getSymbol(), name);
 				return null;
 			}
 

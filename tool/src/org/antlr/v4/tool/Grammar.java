@@ -13,7 +13,6 @@ import org.antlr.v4.misc.CharSupport;
 import org.antlr.v4.misc.OrderedHashMap;
 import org.antlr.v4.misc.Utils;
 import org.antlr.v4.parse.ANTLRParser;
-import org.antlr.v4.parse.GrammarASTAdaptor;
 import org.antlr.v4.parse.GrammarTreeVisitor;
 import org.antlr.v4.parse.TokenVocabParser;
 import org.antlr.v4.runtime.CharStream;
@@ -35,11 +34,11 @@ import org.antlr.v4.runtime.misc.IntegerList;
 import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.misc.IntervalSet;
 import org.antlr.v4.runtime.misc.Pair;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.antlr.v4.tool.ast.ActionAST;
 import org.antlr.v4.tool.ast.GrammarAST;
 import org.antlr.v4.tool.ast.GrammarRootAST;
 import org.antlr.v4.tool.ast.PredAST;
-import org.antlr.v4.tool.ast.RuleAST;
 import org.antlr.v4.tool.ast.TerminalAST;
 
 import java.io.IOException;
@@ -328,17 +327,6 @@ public class Grammar implements AttributeResolver {
 			throw new UnsupportedOperationException();
 		}
 
-
-
-		// ensure each node has pointer to surrounding grammar
-		final Grammar thiz = this;
-		org.antlr.runtime.tree.TreeVisitor v = new org.antlr.runtime.tree.TreeVisitor(new GrammarASTAdaptor());
-		v.visit(ast, new org.antlr.runtime.tree.TreeVisitorAction() {
-			@Override
-			public Object pre(Object t) { ((GrammarAST)t).g = thiz; return t; }
-			@Override
-			public Object post(Object t) { return t; }
-		});
 		initTokenSymbolTables();
 
 		if (tokenVocabSource != null) {
@@ -362,41 +350,43 @@ public class Grammar implements AttributeResolver {
 
     private void loadImportedGrammars(Set<String> visited) {
 		if ( ast==null ) return;
-        GrammarAST i = (GrammarAST)ast.getFirstChildWithType(ANTLRParser.IMPORT);
+        List<ANTLRParser.DelegateGrammarsContext> i = ast.getImportsSpecs();
         if ( i==null ) return;
 	    visited.add(this.name);
         importedGrammars = new ArrayList<Grammar>();
-        for (Object c : i.getChildren()) {
-            GrammarAST t = (GrammarAST)c;
-            String importedGrammarName = null;
-            if ( t.getType()==ANTLRParser.ASSIGN ) {
-				t = (GrammarAST)t.getChild(1);
-				importedGrammarName = t.getText();
-            }
-            else if ( t.getType()==ANTLRParser.ID ) {
-                importedGrammarName = t.getText();
+        for (ANTLRParser.DelegateGrammarsContext t1 : i) {
+			for (ANTLRParser.DelegateGrammarContext c : t1.delegateGrammar()) {
+				ANTLRParser.IdentifierContext t = c.identifier(0);
+				String importedGrammarName = null;
+				if (c.ASSIGN() != null) {
+					t = c.identifier(1);
+					importedGrammarName = t.getText();
+				}
+				else {
+					importedGrammarName = t.getText();
+				}
+				if (visited.contains(importedGrammarName)) { // ignore circular refs
+					continue;
+				}
+				Grammar g;
+				TerminalNode tokenNode = Utils.getFirstTokenNode(t);
+				try {
+					g = tool.loadImportedGrammar(this, tokenNode);
+				} catch (IOException ioe) {
+					tool.errMgr.grammarError(ErrorType.ERROR_READING_IMPORTED_GRAMMAR,
+							importedGrammarName,
+							tokenNode.getSymbol(),
+							importedGrammarName,
+							name);
+					continue;
+				}
+				// did it come back as error node or missing?
+				if (g == null) continue;
+				g.parent = this;
+				importedGrammars.add(g);
+				g.loadImportedGrammars(visited); // recursively pursue any imports in this import
 			}
-			if ( visited.contains(importedGrammarName) ) { // ignore circular refs
-				continue;
-			}
-			Grammar g;
-			try {
-				g = tool.loadImportedGrammar(this, t);
-			}
-			catch (IOException ioe) {
-				tool.errMgr.grammarError(ErrorType.ERROR_READING_IMPORTED_GRAMMAR,
-										 importedGrammarName,
-										 t.getToken(),
-										 importedGrammarName,
-										 name);
-				continue;
-			}
-			// did it come back as error node or missing?
-			if ( g == null ) continue;
-			g.parent = this;
-			importedGrammars.add(g);
-			g.loadImportedGrammars(visited); // recursively pursue any imports in this import
-        }
+		}
     }
 
     public void defineAction(GrammarAST atAST) {
@@ -1174,45 +1164,41 @@ public class Grammar implements AttributeResolver {
 			"(RULE %name:TOKEN_REF (BLOCK (LEXER_ALT_ACTION (ALT %lit:STRING_LITERAL) (LEXER_ACTION_CALL . .) .)))",
 			// TODO: allow doc comment in there
 		};
-		GrammarASTAdaptor adaptor = new GrammarASTAdaptor(ast.token.getInputStream());
-		org.antlr.runtime.tree.TreeWizard wiz = new org.antlr.runtime.tree.TreeWizard(adaptor,ANTLRParser.tokenNames);
 		List<Pair<GrammarAST,GrammarAST>> lexerRuleToStringLiteral =
 			new ArrayList<Pair<GrammarAST,GrammarAST>>();
 
-		List<GrammarAST> ruleNodes = ast.getNodesWithType(ANTLRParser.RULE);
+		List<ANTLRParser.LexerRuleSpecContext> ruleNodes = ast.getLexerRules();
 		if ( ruleNodes==null || ruleNodes.isEmpty() ) return null;
 
-		for (GrammarAST r : ruleNodes) {
+		for (ANTLRParser.LexerRuleSpecContext r : ruleNodes) {
 			//tool.log("grammar", r.toStringTree());
 //			System.out.println("chk: "+r.toStringTree());
-			GrammarAST name = r.getChild(0);
-			if ( name.getType()==ANTLRParser.TOKEN_REF ) {
+			TerminalNode name = r.TOKEN_REF();
 				// check rule against patterns
 				boolean isLitRule;
 				for (String pattern : patterns) {
 					isLitRule =
-						defAlias(r, pattern, wiz, lexerRuleToStringLiteral);
+						defAlias(r, pattern, lexerRuleToStringLiteral);
 					if ( isLitRule ) break;
 				}
 //				if ( !isLitRule ) System.out.println("no pattern matched");
-			}
 		}
 		return lexerRuleToStringLiteral;
 	}
 
-	protected static boolean defAlias(GrammarAST r, String pattern,
-									  org.antlr.runtime.tree.TreeWizard wiz,
+	protected static boolean defAlias(ANTLRParser.LexerRuleSpecContext r, String pattern,
 									  List<Pair<GrammarAST,GrammarAST>> lexerRuleToStringLiteral)
 	{
 		HashMap<String, Object> nodes = new HashMap<String, Object>();
-		if ( wiz.parse(r, pattern, nodes) ) {
-			GrammarAST litNode = (GrammarAST)nodes.get("lit");
-			GrammarAST nameNode = (GrammarAST)nodes.get("name");
-			Pair<GrammarAST, GrammarAST> pair =
-				new Pair<GrammarAST, GrammarAST>(nameNode, litNode);
-			lexerRuleToStringLiteral.add(pair);
-			return true;
-		}
+		//TODO: check token is fit pattern
+//		if ( wiz.parse(r, pattern, nodes) ) {
+//			GrammarAST litNode = (GrammarAST)nodes.get("lit");
+//			GrammarAST nameNode = (GrammarAST)nodes.get("name");
+//			Pair<GrammarAST, GrammarAST> pair =
+//				new Pair<GrammarAST, GrammarAST>(nameNode, litNode);
+//			lexerRuleToStringLiteral.add(pair);
+//			return true;
+//		}
 		return false;
 	}
 
@@ -1226,7 +1212,7 @@ public class Grammar implements AttributeResolver {
 			@Override
 			public ErrorManager getErrorManager() { return tool.errMgr; }
 		};
-		collector.visitGrammar(ast);
+//		collector.visitGrammar(ast);
 		return strings;
 	}
 
@@ -1234,48 +1220,6 @@ public class Grammar implements AttributeResolver {
 		decisionDFAs.put(decision, lookaheadDFA);
 	}
 
-	public static Map<Integer, Interval> getStateToGrammarRegionMap(GrammarRootAST ast, IntervalSet grammarTokenTypes) {
-		Map<Integer, Interval> stateToGrammarRegionMap = new HashMap<Integer, Interval>();
-		if ( ast==null ) return stateToGrammarRegionMap;
-
-		List<GrammarAST> nodes = ast.getNodesWithType(grammarTokenTypes);
-		for (GrammarAST n : nodes) {
-			if (n.atnState != null) {
-				Interval tokenRegion = Interval.of(n.getTokenStartIndex(), n.getTokenStopIndex());
-				GrammarAST ruleNode = null;
-				// RULEs, BLOCKs of transformed recursive rules point to original token interval
-				switch ( n.getType() ) {
-					case ANTLRParser.RULE :
-						ruleNode = n;
-						break;
-					case ANTLRParser.BLOCK :
-					case ANTLRParser.CLOSURE :
-						ruleNode = n.getAncestor(ANTLRParser.RULE);
-						break;
-				}
-				if ( ruleNode instanceof RuleAST ) {
-					String ruleName = ((RuleAST) ruleNode).getRuleName();
-					Rule r = ast.g.getRule(ruleName);
-					if ( r instanceof LeftRecursiveRule ) {
-						RuleAST originalAST = ((LeftRecursiveRule) r).getOriginalAST();
-						tokenRegion = Interval.of(originalAST.getTokenStartIndex(), originalAST.getTokenStopIndex());
-					}
-				}
-				stateToGrammarRegionMap.put(n.atnState.stateNumber, tokenRegion);
-			}
-		}
-		return stateToGrammarRegionMap;
-	}
-
-	/** Given an ATN state number, return the token index range within the grammar from which that ATN state was derived. */
-	public Interval getStateToGrammarRegion(int atnStateNumber) {
-		if ( stateToGrammarRegionMap==null ) {
-			stateToGrammarRegionMap = getStateToGrammarRegionMap(ast, null); // map all nodes with non-null atn state ptr
-		}
-		if ( stateToGrammarRegionMap==null ) return Interval.INVALID;
-
-		return stateToGrammarRegionMap.get(atnStateNumber);
-	}
 
 	public LexerInterpreter createLexerInterpreter(CharStream input) {
 		if (this.isParser()) {

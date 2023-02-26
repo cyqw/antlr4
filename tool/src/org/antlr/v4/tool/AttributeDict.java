@@ -6,8 +6,8 @@
 
 package org.antlr.v4.tool;
 
+import org.antlr.v4.parse.ANTLRParser;
 import org.antlr.v4.runtime.Token;
-import org.antlr.v4.tool.ast.GrammarAST;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -23,7 +23,7 @@ import java.util.Set;
  */
 public class AttributeDict {
     public String name;
-    public GrammarAST ast;
+    public ANTLRParser.ArgActionBlockContext ast;
 	public DictType type;
 
     /** All {@link Token} scopes (token labels) share the same fixed scope of

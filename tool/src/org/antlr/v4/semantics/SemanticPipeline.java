@@ -16,6 +16,7 @@ import org.antlr.v4.tool.Grammar;
 import org.antlr.v4.tool.LexerGrammar;
 import org.antlr.v4.tool.Rule;
 import org.antlr.v4.tool.ast.GrammarAST;
+import org.antlr.v4.tool.ast.RuleAST;
 
 import java.util.HashSet;
 import java.util.List;
@@ -180,12 +181,12 @@ public class SemanticPipeline {
 	}
 
 	boolean hasTypeOrMoreCommand(Rule r) {
-		GrammarAST ast = r.ast;
+		ANTLRParser.LexerRuleSpecContext ast = r.lexerAst;
 		if (ast == null) {
 			return false;
 		}
 
-		GrammarAST altActionAst = (GrammarAST)ast.getFirstDescendantWithType(ANTLRParser.LEXER_ALT_ACTION);
+		GrammarAST altActionAst = (GrammarAST)ast.act(ANTLRParser.LEXER_ALT_ACTION);
 		if (altActionAst == null) {
 			// the rule isn't followed by any commands
 			return false;

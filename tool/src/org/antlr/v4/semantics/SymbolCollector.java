@@ -12,6 +12,7 @@ import org.antlr.v4.tool.Grammar;
 import org.antlr.v4.tool.Rule;
 import org.antlr.v4.tool.ast.ActionAST;
 import org.antlr.v4.tool.ast.GrammarAST;
+import org.antlr.v4.tool.ast.GrammarRootAST;
 import org.antlr.v4.tool.ast.TerminalAST;
 
 import java.util.ArrayList;
@@ -54,7 +55,7 @@ public class SymbolCollector extends GrammarTreeVisitor {
 	@Override
 	public ErrorManager getErrorManager() { return errMgr; }
 
-	public void process(GrammarAST ast) { visitGrammar(ast); }
+	public void process(GrammarRootAST ast) { visitGrammar(ast); }
 
 //	@Override
 //	public void globalNamedAction(GrammarAST scope, GrammarAST ID, ActionAST action) {

@@ -63,7 +63,7 @@ public class TestScopeParsing {
     public void testArgs(Parameter parameter) throws Exception {
 		Grammar dummy = new Grammar("grammar T; a:'a';");
 
-		LinkedHashMap<String, Attribute> attributes = ScopeParser.parseTypedArgList(null, parameter.input, dummy).attributes;
+		LinkedHashMap<String, Attribute> attributes = ScopeParser.parseTypedArgList(parameter.input, dummy, null.ARGUMENT_CONTENT(0).getSymbol()).attributes;
 		List<String> out = new ArrayList<>();
 		for (String arg : attributes.keySet()) {
 			Attribute attr = attributes.get(arg);

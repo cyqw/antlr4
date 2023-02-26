@@ -11,6 +11,7 @@ import org.antlr.v4.parse.ANTLRParser.ParserRuleSpecContext;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.IntegerList;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.antlr.v4.runtime.tree.Trees;
 import org.antlr.v4.tool.ast.GrammarAST;
 
@@ -55,6 +56,11 @@ public class Utils {
 	public static <T> T getFirstFirstChildWithType(ParseTree node, Class<T> typeClass) {
 		return (T)Trees.findNodeSuchThat(node, it -> it.getClass().equals(typeClass));
 	}
+
+	public static TerminalNode getFirstTokenNode(ParserRuleContext node) {
+		return (TerminalNode) Trees.findNodeSuchThat(node, TerminalNode.class::isInstance);
+	}
+
 	public interface Filter<T> {
 		boolean select(T t);
 	}

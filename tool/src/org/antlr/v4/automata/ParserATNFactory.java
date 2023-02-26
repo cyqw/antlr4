@@ -158,7 +158,7 @@ public class ParserATNFactory implements ATNFactory {
 		GrammarASTAdaptor adaptor = new GrammarASTAdaptor();
 		for (Rule r : rules) {
 			// find rule's block
-			GrammarAST blk = (GrammarAST)r.ast.getFirstChildWithType(ANTLRParser.BLOCK);
+			GrammarAST blk = (GrammarAST)r.ast.(ANTLRParser.BLOCK);
 			CommonTreeNodeStream nodes = new CommonTreeNodeStream(adaptor,blk);
 			ATNBuilder b = new ATNBuilder(nodes,this);
 			try {

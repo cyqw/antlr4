@@ -6,12 +6,13 @@
 
 package org.antlr.v4.tool;
 
+import org.antlr.v4.parse.ANTLRParser;
 import org.antlr.v4.runtime.misc.Pair;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.antlr.v4.tool.ast.ActionAST;
 import org.antlr.v4.tool.ast.AltAST;
 import org.antlr.v4.tool.ast.GrammarAST;
 import org.antlr.v4.tool.ast.PredAST;
-import org.antlr.v4.tool.ast.RuleAST;
 import org.stringtemplate.v4.misc.MultiMap;
 
 import java.util.ArrayList;
@@ -53,9 +54,10 @@ public class Rule implements AttributeResolver {
 	}
 
 	public final String name;
-	public List<GrammarAST> modifiers;
+	public List<TerminalNode> modifiers;
 
-	public RuleAST ast;
+	public ANTLRParser.LexerRuleSpecContext lexerAst;
+	public ANTLRParser.ParserRuleSpecContext parserAst;
 	public AttributeDict args;
 	public AttributeDict retvals;
 	public AttributeDict locals;
@@ -74,8 +76,8 @@ public class Rule implements AttributeResolver {
      *  I track the AST node for the action in case I need the line number
      *  for errors.
      */
-    public Map<String, ActionAST> namedActions =
-        new HashMap<String, ActionAST>();
+    public Map<String, ANTLRParser.ActionBlockContext> namedActions =
+        new HashMap<String, ANTLRParser.ActionBlockContext>();
 
     /** Track exception handlers; points at "catch" node of (catch exception action)
 	 *  don't track finally action
@@ -105,17 +107,22 @@ public class Rule implements AttributeResolver {
 
 	public int actionIndex = -1; // if lexer; 0..n-1 for n actions in a rule
 
-	public Rule(Grammar g, String name, RuleAST ast, int numberOfAlts) {
-		this(g, name, ast, numberOfAlts, null, false);
+	public Rule(Grammar g, String name, ANTLRParser.ParserRuleSpecContext ast, int numberOfAlts) {
+		this(g, name, numberOfAlts, null, false);
+		this.parserAst = ast;
 	}
 
-	public Rule(Grammar g, String name, RuleAST ast, int numberOfAlts, String lexerMode, boolean caseInsensitive) {
+	public Rule(Grammar g, String name, ANTLRParser.LexerRuleSpecContext ast, int numberOfAlts, String lexerMode, boolean caseInsensitive) {
+		this(g, name, numberOfAlts, lexerMode, caseInsensitive);
+		this.lexerAst = ast;
+	}
+
+	private Rule(Grammar g, String name, int numberOfAlts, String lexerMode, boolean caseInsensitive) {
 		this.g = g;
 		this.name = name;
-		this.ast = ast;
 		this.numberOfAlts = numberOfAlts;
-		alt = new Alternative[numberOfAlts+1]; // 1..n
-		for (int i=1; i<=numberOfAlts; i++) alt[i] = new Alternative(this, i);
+		alt = new Alternative[numberOfAlts +1]; // 1..n
+		for (int i = 1; i<= numberOfAlts; i++) alt[i] = new Alternative(this, i);
 		this.mode = lexerMode;
 		this.caseInsensitive = caseInsensitive;
 	}
@@ -315,7 +322,7 @@ public class Rule implements AttributeResolver {
 
 	public boolean isFragment() {
 		if ( modifiers==null ) return false;
-		for (GrammarAST a : modifiers) {
+		for (TerminalNode a : modifiers) {
 			if ( a.getText().equals("fragment") ) return true;
 		}
 		return false;

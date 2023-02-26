@@ -8,18 +8,12 @@ package org.antlr.v4.tool.ast;
 
 import org.antlr.v4.parse.ANTLRParser;
 import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.tool.Grammar;
 
-public class RuleAST extends GrammarASTWithOptions {
-	public RuleAST(RuleAST node) {
-		super(node);
-	}
+public class RuleAST  {
 
-	public RuleAST(ParseTree tree) {super(tree);}
 
-	public RuleAST(Token t) { super(t); }
-    public RuleAST(int type) { super(type); }
+	public RuleAST(Token t) { }
 
 	public boolean isLexerRule() {
 		String name = getRuleName();

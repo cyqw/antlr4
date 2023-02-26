@@ -5,7 +5,7 @@
  *  Copyright (c) 2015 Gerald Rosenberg
  *  All rights reserved.
  *
- *  Redistribution and use in source and binary forms, with or without
+ *  Redistribution and use in source and binary forms, with or withmout
  *  modification, are permitted provided that the following conditions
  *  are met:
  *

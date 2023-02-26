@@ -8,6 +8,7 @@ package org.antlr.v4.tool;
 
 import org.antlr.v4.analysis.LeftRecursiveRuleAltInfo;
 import org.antlr.v4.misc.OrderedHashMap;
+import org.antlr.v4.parse.ANTLRParser;
 import org.antlr.v4.runtime.misc.Pair;
 import org.antlr.v4.tool.ast.AltAST;
 import org.antlr.v4.tool.ast.GrammarAST;
@@ -21,13 +22,13 @@ import java.util.Map;
 public class LeftRecursiveRule extends Rule {
 	public List<LeftRecursiveRuleAltInfo> recPrimaryAlts;
 	public OrderedHashMap<Integer, LeftRecursiveRuleAltInfo> recOpAlts;
-	public RuleAST originalAST;
+	public ANTLRParser.ParserRuleSpecContext originalAST;
 
 	/** Did we delete any labels on direct left-recur refs? Points at ID of ^(= ID el) */
 	public List<Pair<GrammarAST,String>> leftRecursiveRuleRefLabels =
 		new ArrayList<Pair<GrammarAST,String>>();
 
-	public LeftRecursiveRule(Grammar g, String name, RuleAST ast) {
+	public LeftRecursiveRule(Grammar g, String name, ANTLRParser.ParserRuleSpecContext ast) {
 		super(g, name, ast, 1);
 		originalAST = ast;
 		alt = new Alternative[numberOfAlts+1]; // always just one

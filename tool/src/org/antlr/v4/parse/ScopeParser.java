@@ -8,12 +8,12 @@ package org.antlr.v4.parse;
 
 import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.Lexer;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.Pair;
 import org.antlr.v4.tool.Attribute;
 import org.antlr.v4.tool.AttributeDict;
 import org.antlr.v4.tool.ErrorType;
 import org.antlr.v4.tool.Grammar;
-import org.antlr.v4.tool.ast.ActionAST;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,11 +43,11 @@ public class ScopeParser {
 	 * <p>
 	 * convert to an attribute scope.
 	 */
-	public static AttributeDict parseTypedArgList(ActionAST action, String s, Grammar g) {
+	public static AttributeDict parseTypedArgList(ANTLRParser.ArgActionBlockContext action, String s, Grammar g) {
 		return parse(action, s, ',', g);
 	}
 
-	public static AttributeDict parse(ActionAST action, String s, char separator, Grammar g) {
+	public static AttributeDict parse(ANTLRParser.ArgActionBlockContext action, String s, char separator, Grammar g) {
 		AttributeDict dict = new AttributeDict();
 		List<Pair<String, Integer>> decls = splitDecls(s, separator);
 		for (Pair<String, Integer> decl : decls) {
@@ -65,7 +65,7 @@ public class ScopeParser {
 	 * but if the separator is ',' you cannot use ',' in the initvalue
 	 * unless you escape use "\," escape.
 	 */
-	public static Attribute parseAttributeDef(ActionAST action, Pair<String, Integer> decl, Grammar g) {
+	public static Attribute parseAttributeDef(ANTLRParser.ArgActionBlockContext action, Pair<String, Integer> decl, Grammar g) {
 		if (decl.a == null) return null;
 
 		Attribute attr = new Attribute();
@@ -121,25 +121,26 @@ public class ScopeParser {
 			int declOffset = charIndexes[decl.b];
 			int declLine = lines[declOffset + idStart];
 
-			int line = action.getToken().getLine() + declLine;
+			Token token = action.ARGUMENT_CONTENT(0).getSymbol();
+			int line = token.getLine() + declLine;
 			int charPositionInLine = charPositionInLines[declOffset + idStart];
 			if (declLine == 0) {
 				/* offset for the start position of the ARG_ACTION token, plus 1
 				 * since the ARG_ACTION text had the leading '[' stripped before
 				 * reaching the scope parser.
 				 */
-				charPositionInLine += action.getToken().getCharPositionInLine() + 1;
+				charPositionInLine += token.getCharPositionInLine() + 1;
 			}
 
-			int offset = ((CommonToken) action.getToken()).getStartIndex();
-			attr.token = new CommonToken(new Pair(null, action.getToken().getInputStream()), ANTLRParser.ID, Lexer.DEFAULT_TOKEN_CHANNEL, offset + declOffset + idStart + 1, offset + declOffset + idStop);
+			int offset = token.getStartIndex();
+			attr.token = new CommonToken(new Pair(null, token.getInputStream()), ANTLRParser.ID, Lexer.DEFAULT_TOKEN_CHANNEL, offset + declOffset + idStart + 1, offset + declOffset + idStop);
 			assert attr.name.equals(attr.token.getText()) : "Attribute text should match the pseudo-token text at this point.";
 		}
 
 		return attr;
 	}
 
-	public static Pair<Integer, Integer> _parsePrefixDecl(Attribute attr, String decl, ActionAST a, Grammar g) {
+	public static Pair<Integer, Integer> _parsePrefixDecl(Attribute attr, String decl, ANTLRParser.ArgActionBlockContext a, Grammar g) {
 		// walk backwards looking for start of an ID
 		boolean inID = false;
 		int start = -1;
@@ -158,7 +159,7 @@ public class ScopeParser {
 			start = 0;
 		}
 		if (start < 0) {
-			g.tool.errMgr.grammarError(ErrorType.CANNOT_FIND_ATTRIBUTE_NAME_IN_DECL, g.fileName, a.token, decl);
+			g.tool.errMgr.grammarError(ErrorType.CANNOT_FIND_ATTRIBUTE_NAME_IN_DECL, g.fileName, a.ARGUMENT_CONTENT(0).getSymbol(), decl);
 		}
 
 		// walk forward looking for end of an ID
@@ -191,7 +192,7 @@ public class ScopeParser {
 		return new Pair<Integer, Integer>(start, stop);
 	}
 
-	public static Pair<Integer, Integer> _parsePostfixDecl(Attribute attr, String decl, ActionAST a, Grammar g) {
+	public static Pair<Integer, Integer> _parsePostfixDecl(Attribute attr, String decl, ANTLRParser.ArgActionBlockContext a, Grammar g) {
 		int start = -1;
 		int stop = -1;
 		int colon = decl.indexOf(':');
@@ -208,7 +209,7 @@ public class ScopeParser {
 
 		if (start == -1) {
 			start = 0;
-			g.tool.errMgr.grammarError(ErrorType.CANNOT_FIND_ATTRIBUTE_NAME_IN_DECL, g.fileName, a.token, decl);
+			g.tool.errMgr.grammarError(ErrorType.CANNOT_FIND_ATTRIBUTE_NAME_IN_DECL, g.fileName, a.ARGUMENT_CONTENT(0).getSymbol(), decl);
 		}
 
 		// look for stop of name

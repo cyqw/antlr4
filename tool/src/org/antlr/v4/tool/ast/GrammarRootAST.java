@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class GrammarRootAST extends GrammarASTWithOptions {
+public class GrammarRootAST {
 	public static final Map<String, String> defaultOptions = new HashMap<String, String>();
 	static {
 		defaultOptions.put("language","Java");
@@ -43,13 +43,16 @@ public class GrammarRootAST extends GrammarASTWithOptions {
 	private List<ANTLRParser.LexerCommandContext> lexerCommands = new ArrayList<>();
 
 	private List<ANTLRParser.OptionsSpecContext> optionsSpecs = new ArrayList<>();
+
+	private List<ANTLRParser.OptionsSpecContext> globalOptionsSpecs = new ArrayList<>();
+
+	private Map<String, String> options = new HashMap<>();
 	private List<ANTLRParser.DelegateGrammarsContext> importSpecs = new ArrayList<>();
 	private List<ANTLRParser.TokensSpecContext> tokensSpecs = new ArrayList<>();
 	private Map<TerminalNode,List<ANTLRParser.LexerRuleSpecContext>> modes = new HashMap<>();
 	private List<ANTLRParser.ChannelsSpecContext> channels = new ArrayList<>();
 	private List<ANTLRParser.ElementOptionContext> elementOptions = new ArrayList<>();
 	private List<ANTLRParser.ActionBlockContext> actions = new ArrayList<>();
-
 
 	private List<ANTLRParser.LabeledElementContext> labeledElements = new ArrayList<>();
 
@@ -66,13 +69,11 @@ public class GrammarRootAST extends GrammarASTWithOptions {
 	private List<ParserRuleContext> errorContexts;
 
 	public GrammarRootAST(GrammarRootAST node) {
-		super(node);
 		this.grammarType = node.grammarType;
 		this.hasErrors = node.hasErrors;
 	}
 
 	public GrammarRootAST(Token t, TokenStream tokenStream) {
-		super(t);
 		if (tokenStream == null) {
 			throw new NullPointerException("tokenStream");
 		}
@@ -80,7 +81,6 @@ public class GrammarRootAST extends GrammarASTWithOptions {
 	}
 
 	public GrammarRootAST(int type, Token t, TokenStream tokenStream) {
-		super(type, t);
 		if (tokenStream == null) {
 			throw new NullPointerException("tokenStream");
 		}
@@ -88,7 +88,6 @@ public class GrammarRootAST extends GrammarASTWithOptions {
 	}
 
 	public GrammarRootAST(int type, Token t, String text, TokenStream tokenStream) {
-		super(type,t,text);
 		if (tokenStream == null) {
 			throw new NullPointerException("tokenStream");
 		}
@@ -96,7 +95,6 @@ public class GrammarRootAST extends GrammarASTWithOptions {
     }
 
 	public GrammarRootAST(ANTLRParser.GrammarSpecContext r) {
-		super(r);
 		this.root = r;
 	}
 
@@ -111,20 +109,20 @@ public class GrammarRootAST extends GrammarASTWithOptions {
 		return terminalNode.getSymbol();
 	}
 
-	@Override
 	public String getOptionString(String key) {
 		if ( cmdLineOptions!=null && cmdLineOptions.containsKey(key) ) {
 			return cmdLineOptions.get(key);
 		}
-		String value = super.getOptionString(key);
+		String value = getGrammarOptionString(key);
 		if ( value==null ) {
 			value = defaultOptions.get(key);
 		}
 		return value;
 	}
 
-	@Override
-	public Object visit(GrammarASTVisitor v) { return v.visit(this); }
+	private String getGrammarOptionString(String key) {
+		return this.options.get(key);
+	}
 
 	public void addParserRule(ANTLRParser.ParserRuleSpecContext rule) {
 		parserRules.add(rule);
@@ -192,8 +190,19 @@ public class GrammarRootAST extends GrammarASTWithOptions {
 		return tokensSpecs;
 	}
 
+	public List<ANTLRParser.OptionsSpecContext> getGlobalOptionsSpecs() {
+		return globalOptionsSpecs;
+	}
+
 	public void addOptionsSpec(ANTLRParser.OptionsSpecContext ctx) {
 		this.optionsSpecs.add(ctx);
+		ParserRuleContext parentNode = ctx.getParent();
+		if (parentNode instanceof ANTLRParser.PrequelConstructContext) {
+			this.globalOptionsSpecs.add(ctx);
+			for (ANTLRParser.OptionContext option: ctx.option()) {
+				options.put(option.identifier().getText(), option.optionValue().getText());
+			}
+		}
 	}
 
 	public void addTokensSpec(ANTLRParser.TokensSpecContext ctx) {

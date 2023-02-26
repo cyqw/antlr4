@@ -9,6 +9,7 @@ package org.antlr.v4.semantics;
 import org.antlr.v4.misc.Utils;
 import org.antlr.v4.parse.ANTLRParser;
 import org.antlr.v4.parse.GrammarTreeVisitor;
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -17,7 +18,6 @@ import org.antlr.v4.tool.ErrorManager;
 import org.antlr.v4.tool.ErrorType;
 import org.antlr.v4.tool.Grammar;
 import org.antlr.v4.tool.Rule;
-import org.antlr.v4.tool.ast.GrammarAST;
 import org.antlr.v4.tool.ast.GrammarRootAST;
 import org.stringtemplate.v4.misc.MultiMap;
 
@@ -109,7 +109,7 @@ public class BasicSemanticChecks extends GrammarTreeVisitor {
 		});
 		g.ast.getLexerRules().forEach(it -> {
 			checkInvalidRuleDef(it.TOKEN_REF().getSymbol());
-			defineToken(getFirstTokenNode(it.TOKEN_REF()));
+			defineToken(it.TOKEN_REF());
 		});
 		g.ast.getParserRules().forEach(it -> {
 			checkInvalidRuleDef(it.RULE_REF().getSymbol());
@@ -127,24 +127,19 @@ public class BasicSemanticChecks extends GrammarTreeVisitor {
 		g.ast.getElementOptions().forEach(it -> elementOption(it.getParent(), it.identifier(0), it.identifier(1)));
 		g.ast.getLabeledElements().forEach(this::label);
 
-		visitGrammar(g.ast);
 		discoverRules(g.ast.getRules());
 	}
 
 	private void checkOptions(ANTLRParser.OptionsSpecContext options) {
 		options.option().forEach(it -> {
 			if (Utils.getParent(options, ANTLRParser.LexerRuleSpecContext.class) != null) {
-				ruleOption(getFirstTokenNode(it.identifier()), getFirstTokenNode(it.optionValue()));
+				ruleOption(Utils.getFirstTokenNode(it.identifier()), Utils.getFirstTokenNode(it.optionValue()));
 			} else if (Utils.getParent(options, ANTLRParser.LexerRuleSpecContext.class) != null) {
-				blockOption(getFirstTokenNode(it.identifier()), getFirstTokenNode(it.optionValue()));
+				blockOption(Utils.getFirstTokenNode(it.identifier()), Utils.getFirstTokenNode(it.optionValue()));
 			} else {
-				grammarOption(getFirstTokenNode(it.identifier()), getFirstTokenNode(it.optionValue()));
+				grammarOption(Utils.getFirstTokenNode(it.identifier()), Utils.getFirstTokenNode(it.optionValue()));
 			}
 		});
-	}
-
-	private static TerminalNode getFirstTokenNode(ParseTree node) {
-		return (TerminalNode) Trees.findNodeSuchThat(node, TerminalNode.class::isInstance);
 	}
 
 	// Routines to route visitor traffic to the checking routines
@@ -159,7 +154,7 @@ public class BasicSemanticChecks extends GrammarTreeVisitor {
 
 	public void importGrammar(ANTLRParser.DelegateGrammarsContext importRules) {
 		for (ANTLRParser.DelegateGrammarContext importRule : importRules.delegateGrammar()) {
-			TerminalNode id = getFirstTokenNode(importRule);
+			TerminalNode id = Utils.getFirstTokenNode(importRule);
 			checkImport(id.getSymbol());
 		}
 	}
@@ -218,8 +213,8 @@ public class BasicSemanticChecks extends GrammarTreeVisitor {
 		checkChannelDefinition(ID.getSymbol());
 	}
 
-	public void elementOption(ParseTree elem, ParseTree ID, ParseTree valueAST) {
-		checkElementOptions(elem, getFirstTokenNode(ID), valueAST);
+	public void elementOption(ParseTree elem, ParserRuleContext ID, ParserRuleContext valueAST) {
+		checkElementOptions(elem, Utils.getFirstTokenNode(ID), valueAST);
 	}
 
 	public void finishRule(ANTLRParser.ParserRuleSpecContext rule, TerminalNode ID, ANTLRParser.RuleBlockContext block) {
@@ -235,7 +230,7 @@ public class BasicSemanticChecks extends GrammarTreeVisitor {
 				// first check that label doesn't conflict with a rule
 				// label X or x can't be rule x.
 				Rule r = ruleCollector.rules.get(Utils.decapitalize(altLabel));
-				TerminalNode labelNode = getFirstTokenNode(altAST.identifier());
+				TerminalNode labelNode = Utils.getFirstTokenNode(altAST.identifier());
 				if ( r!=null ) {
 					g.tool.errMgr.grammarError(ErrorType.ALT_LABEL_CONFLICTS_WITH_RULE,
 											   g.fileName, labelNode.getSymbol(),
@@ -256,7 +251,7 @@ public class BasicSemanticChecks extends GrammarTreeVisitor {
 				}
 			}
 		}
-		List<GrammarAST> altLabels = ruleCollector.ruleToAltLabels.get(ruleName);
+		List<ANTLRParser.LabeledElementContext> altLabels = ruleCollector.ruleToAltLabels.get(ruleName);
 		int numAltLabels = 0;
 		if ( altLabels!=null ) numAltLabels = altLabels.size();
 		if ( numAltLabels>0 && nalts != numAltLabels ) {
@@ -467,7 +462,7 @@ public class BasicSemanticChecks extends GrammarTreeVisitor {
 	/** Check option is appropriate for elem; parent of ID is ELEMENT_OPTIONS */
 	boolean checkElementOptions(ParseTree elem,
 								TerminalNode ID,
-								ParseTree valueAST)
+								ParserRuleContext valueAST)
 	{
 		if (checkAssocElementOption && ID != null && "assoc".equals(ID.getText())) {
 			if (!(elem instanceof ANTLRParser.AltListContext)) { // TODO: check elem is ALT type
