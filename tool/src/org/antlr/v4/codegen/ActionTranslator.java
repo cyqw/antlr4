@@ -9,7 +9,7 @@ package org.antlr.v4.codegen;
 import org.antlr.v4.codegen.model.RuleFunction;
 import org.antlr.v4.codegen.model.chunk.*;
 import org.antlr.v4.codegen.model.decl.StructDecl;
-import org.antlr.v4.parse.ActionSplitter;
+import org.antlr.v4.parse.ANTLRParser;
 import org.antlr.v4.parse.ActionSplitterListener;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
@@ -17,7 +17,6 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.tool.Attribute;
 import org.antlr.v4.tool.ErrorType;
 import org.antlr.v4.tool.Rule;
-import org.antlr.v4.tool.ast.ActionAST;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
@@ -61,13 +60,13 @@ public class ActionTranslator implements ActionSplitterListener {
 
 	final CodeGenerator gen;
 	final Target target;
-	final ActionAST node;
+	final ANTLRParser.ActionBlockContext node;
 	RuleFunction rf;
 	final List<ActionChunk> chunks = new ArrayList<ActionChunk>();
 	final OutputModelFactory factory;
 	StructDecl nodeContext;
 
-	public ActionTranslator(OutputModelFactory factory, ActionAST node) {
+	public ActionTranslator(OutputModelFactory factory, ANTLRParser.ActionBlockContext node) {
 		this.factory = factory;
 		this.node = node;
 		this.gen = factory.getGenerator();
@@ -83,7 +82,7 @@ public class ActionTranslator implements ActionSplitterListener {
 	public static List<ActionChunk> translateAction(OutputModelFactory factory,
 													RuleFunction rf,
 													Token tokenWithinAction,
-													ActionAST node)
+													ANTLRParser.ActionBlockContext node)
 	{
 		String action = tokenWithinAction.getText();
 		if ( action!=null && action.length()>0 && action.charAt(0)=='{' ) {
@@ -99,13 +98,13 @@ public class ActionTranslator implements ActionSplitterListener {
 	public static List<ActionChunk> translateActionChunk(OutputModelFactory factory,
 														 RuleFunction rf,
 														 String action,
-														 ActionAST node)
+														 ANTLRParser.ActionBlockContext node)
 	{
-		Token tokenWithinAction = node.token;
 		ActionTranslator translator = new ActionTranslator(factory, node);
 		translator.rf = rf;
         factory.getGrammar().tool.log("action-translator", "translate " + action);
-		String altLabel = node.getAltLabel();
+		//TODO:
+		String altLabel = "node.getAltLabel()";
 		if ( rf!=null ) {
 		    translator.nodeContext = rf.ruleCtx;
 	        if ( altLabel!=null ) translator.nodeContext = rf.altLabelCtxs.get(altLabel);

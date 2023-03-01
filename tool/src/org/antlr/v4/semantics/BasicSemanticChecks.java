@@ -62,12 +62,12 @@ public class BasicSemanticChecks extends GrammarTreeVisitor {
 		new MultiMap<Integer,Integer>() {
 			{
 				map(ANTLRParser.LEXER, ANTLRParser.LEXER);
-				map(ANTLRParser.LEXER, ANTLRParser.COMBINED);
+				map(ANTLRParser.LEXER, ANTLRParser.GRAMMAR);
 
 				map(ANTLRParser.PARSER, ANTLRParser.PARSER);
-				map(ANTLRParser.PARSER, ANTLRParser.COMBINED);
+				map(ANTLRParser.PARSER, ANTLRParser.GRAMMAR);
 
-				map(ANTLRParser.COMBINED, ANTLRParser.COMBINED);
+				map(ANTLRParser.GRAMMAR, ANTLRParser.GRAMMAR);
 			}
 		};
 
@@ -187,11 +187,11 @@ public class BasicSemanticChecks extends GrammarTreeVisitor {
 	}
 
 	public void ruleOption(TerminalNode ID, TerminalNode valueAST) {
-		checkOptions(ANTLRParser.RULE, ID.getSymbol(), valueAST);
+		checkOptions(ANTLRParser.RULE_ruleSpec, ID.getSymbol(), valueAST);
 	}
 
 	public void blockOption(TerminalNode ID, TerminalNode valueAST) {
-		checkOptions(ANTLRParser.BLOCK, ID.getSymbol(), valueAST);
+		checkOptions(ANTLRParser.RULE_block, ID.getSymbol(), valueAST);
 	}
 
 	public void defineToken(TerminalNode ID) {
@@ -415,10 +415,10 @@ public class BasicSemanticChecks extends GrammarTreeVisitor {
 	void checkOptions(int parentType, Token optionID, TerminalNode valueAST) {
 		Set<String> optionsToCheck = null;
 		switch (parentType) {
-			case ANTLRParser.BLOCK:
+			case ANTLRParser.RULE_block:
 				optionsToCheck = g.isLexer() ? Grammar.lexerBlockOptions : Grammar.parserBlockOptions;
 				break;
-			case ANTLRParser.RULE:
+			case ANTLRParser.RULE_ruleSpec:
 				optionsToCheck = g.isLexer() ? Grammar.lexerRuleOptions : Grammar.parseRuleOptions;
 				break;
 			case ANTLRParser.GRAMMAR:

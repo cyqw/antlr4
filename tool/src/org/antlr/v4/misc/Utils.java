@@ -13,7 +13,6 @@ import org.antlr.v4.runtime.misc.IntegerList;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.antlr.v4.runtime.tree.Trees;
-import org.antlr.v4.tool.ast.GrammarAST;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -104,7 +103,7 @@ public class Utils {
 		return buf.toString();
 	}
 
-	public static <T extends GrammarAST> List<String> nodesToStrings(List<T> nodes) {
+	public static <T extends TerminalNode> List<String> nodesToStrings(List<T> nodes) {
 		if ( nodes == null ) return null;
 		List<String> a = new ArrayList<String>();
 		for (T t : nodes) a.add(t.getText());

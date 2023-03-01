@@ -12,7 +12,6 @@ import org.antlr.v4.parse.ANTLRParser;
 import org.antlr.v4.runtime.misc.Pair;
 import org.antlr.v4.tool.ast.AltAST;
 import org.antlr.v4.tool.ast.GrammarAST;
-import org.antlr.v4.tool.ast.RuleAST;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,9 +47,6 @@ public class LeftRecursiveRule extends Rule {
 		return n;
 	}
 
-	public RuleAST getOriginalAST() {
-		return originalAST;
-	}
 
 	@Override
 	public List<AltAST> getUnlabeledAltASTs() {

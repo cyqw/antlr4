@@ -36,6 +36,10 @@ import java.util.Map;
  *  our pattern.
  */
 public class LeftRecursiveRuleAnalyzer {
+	public boolean rec_rule() {
+		return false;
+	}
+
 	public static enum ASSOC { left, right }
 
 	public Tool tool;
@@ -69,8 +73,7 @@ public class LeftRecursiveRuleAnalyzer {
 		}
 	}
 
-	public LeftRecursiveRuleAnalyzer(GrammarAST ruleAST,
-									 Tool tool, String ruleName, String language)
+	public LeftRecursiveRuleAnalyzer(Tool tool, String ruleName, String language)
 	{
 //		super(new CommonTreeNodeStream(new GrammarASTAdaptor(ruleAST.token.getInputStream()), ruleAST));
 		this.tool = tool;

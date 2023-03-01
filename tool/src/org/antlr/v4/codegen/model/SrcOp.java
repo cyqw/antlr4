@@ -8,7 +8,7 @@ package org.antlr.v4.codegen.model;
 
 import org.antlr.v4.codegen.OutputModelFactory;
 import org.antlr.v4.codegen.model.decl.CodeBlock;
-import org.antlr.v4.tool.ast.GrammarAST;
+import org.antlr.v4.parse.ANTLRParser;
 
 /** */
 public abstract class SrcOp extends OutputModelObject {
@@ -27,9 +27,9 @@ public abstract class SrcOp extends OutputModelObject {
 	public RuleFunction enclosingRuleRunction;
 
 	public SrcOp(OutputModelFactory factory) { this(factory,null); }
-	public SrcOp(OutputModelFactory factory, GrammarAST ast) {
+	public SrcOp(OutputModelFactory factory, ANTLRParser.ActionBlockContext ast) {
 		super(factory,ast);
-		if ( ast!=null ) uniqueID = ast.token.getTokenIndex();
+		if ( ast!=null ) uniqueID = ast.BEGIN_ACTION().getSymbol().getTokenIndex();
 		enclosingBlock = factory.getCurrentBlock();
 		enclosingRuleRunction = factory.getCurrentRuleFunction();
 	}

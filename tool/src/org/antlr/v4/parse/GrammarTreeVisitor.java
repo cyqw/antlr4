@@ -67,7 +67,7 @@ public class GrammarTreeVisitor extends ANTLRParserBaseListener{
 		} else if (ctx.PARSER() != null) {
 			root.grammarType = ANTLRParser.PARSER;
 		} else {
-			root.grammarType = ANTLRParser.COMBINED;
+			root.grammarType = ANTLRParser.GRAMMAR;
 		}
 		super.enterGrammarType(ctx);
 	}

@@ -16,7 +16,6 @@ import org.antlr.v4.tool.Grammar;
 import org.antlr.v4.tool.LexerGrammar;
 import org.antlr.v4.tool.Rule;
 import org.antlr.v4.tool.ast.GrammarAST;
-import org.antlr.v4.tool.ast.RuleAST;
 
 import java.util.HashSet;
 import java.util.List;
@@ -186,22 +185,23 @@ public class SemanticPipeline {
 			return false;
 		}
 
-		GrammarAST altActionAst = (GrammarAST)ast.act(ANTLRParser.LEXER_ALT_ACTION);
+		ANTLRParser.LexerAltListContext altActionAst = ast.lexerRuleBlock().lexerAltList();
 		if (altActionAst == null) {
 			// the rule isn't followed by any commands
 			return false;
 		}
 
 		// first child is the alt itself, subsequent are the actions
-		for (int i = 1; i < altActionAst.getChildCount(); i++) {
-			GrammarAST node = (GrammarAST)altActionAst.getChild(i);
-			if (node.getType() == ANTLRParser.LEXER_ACTION_CALL) {
-				if ("type".equals(node.getChild(0).getText())) {
+		for (ANTLRParser.LexerAltContext node : altActionAst.lexerAlt()) {
+			for (ANTLRParser.LexerCommandContext command: node.lexerCommands().lexerCommand()) {
+				if (command.lexerCommandExpr() != null) {
+					if ("type".equals(command.lexerCommandName().getText())) {
+						return true;
+					}
+				}
+				else if ("more".equals(command.lexerCommandName().getText())) {
 					return true;
 				}
-			}
-			else if ("more".equals(node.getText())) {
-				return true;
 			}
 		}
 

@@ -12,10 +12,12 @@ import org.antlr.v4.analysis.LeftRecursiveRuleTransformer;
 import org.antlr.v4.parse.ANTLRParser;
 import org.antlr.v4.parse.BlockSetTransformer;
 import org.antlr.v4.parse.GrammarASTAdaptor;
+import org.antlr.v4.parse.GrammarToken;
 import org.antlr.v4.runtime.misc.DoubleKeyMap;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.antlr.v4.runtime.tree.Trees;
 import org.antlr.v4.tool.ast.GrammarAST;
-import org.antlr.v4.tool.ast.GrammarASTWithOptions;
 import org.antlr.v4.tool.ast.GrammarRootAST;
 
 import java.util.ArrayList;
@@ -55,63 +57,40 @@ public class GrammarTransformPipeline {
 		transformer.downup(root);
 	}
 
-    /** Find and replace
-     *      ID*[','] with ID (',' ID)*
-     *      ID+[','] with ID (',' ID)+
-     *      (x {action} y)+[','] with x {action} y (',' x {action} y)+
-     *
-     *  Parameter must be a token.
-     *  todo: do we want?
-     */
-    public void expandParameterizedLoops(GrammarRootAST root) {
-        TreeVisitor v = new TreeVisitor(new GrammarASTAdaptor());
-        v.visit(root, new TreeVisitorAction() {
-            @Override
-            public Object pre(Object t) {
-                if ( ((GrammarAST)t).getType() == 3 ) {
-                    return expandParameterizedLoop((GrammarAST)t);
-                }
-                return t;
-            }
-            @Override
-            public Object post(Object t) { return t; }
-        });
-    }
-
 
     /** Utility visitor that sets grammar ptr in each node */
 
-	public static void augmentTokensWithOriginalPosition(final Grammar g, GrammarAST tree) {
+	public static void augmentTokensWithOriginalPosition(final Grammar g, ANTLRParser.RuleSpecContext tree) {
 		if ( tree==null ) return;
 
-		List<GrammarAST> optionsSubTrees = tree.getNodesWithType(ANTLRParser.ELEMENT_OPTIONS);
-		for (int i = 0; i < optionsSubTrees.size(); i++) {
-			GrammarAST t = optionsSubTrees.get(i);
-			CommonTree elWithOpt = t.parent;
-			if ( elWithOpt instanceof GrammarASTWithOptions) {
-				Map<String, GrammarAST> options = ((GrammarASTWithOptions) elWithOpt).getOptions();
-				if ( options.containsKey(LeftRecursiveRuleTransformer.TOKENINDEX_OPTION_NAME) ) {
-					GrammarToken newTok = new GrammarToken(g, elWithOpt.getToken());
-					newTok.originalTokenIndex = Integer.valueOf(options.get(LeftRecursiveRuleTransformer.TOKENINDEX_OPTION_NAME).getText());
-					elWithOpt.token = newTok;
-
-					GrammarAST originalNode = g.ast.getNodeWithTokenIndex(newTok.getTokenIndex());
-					if (originalNode != null) {
-						// update the AST node start/stop index to match the values
-						// of the corresponding node in the original parse tree.
-						elWithOpt.setTokenStartIndex(originalNode.getTokenStartIndex());
-						elWithOpt.setTokenStopIndex(originalNode.getTokenStopIndex());
-					}
-					else {
-						// the original AST node could not be located by index;
-						// make sure to assign valid values for the start/stop
-						// index so toTokenString will not throw exceptions.
-						elWithOpt.setTokenStartIndex(newTok.getTokenIndex());
-						elWithOpt.setTokenStopIndex(newTok.getTokenIndex());
-					}
-				}
-			}
-		}
+//		List<ParseTree> optionsSubTrees  = Trees.findAllNodes(tree, ANTLRParser.OPTIONS, true);
+//		for (int i = 0; i < optionsSubTrees.size(); i++) {
+//			ParseTree t = optionsSubTrees.get(i);
+//			ANTLRParser.OptionsSpecContext elWithOpt = (ANTLRParser.OptionsSpecContext) t.getParent();
+//			ANTLRParser.ParserRuleSpecContext ruleNode = (ANTLRParser.ParserRuleSpecContext) elWithOpt.getParent();
+//			for (ANTLRParser.OptionContext option : elWithOpt.option()) {
+//				if (option.identifier().getText().equals(LeftRecursiveRuleTransformer.TOKENINDEX_OPTION_NAME)) {
+//					GrammarToken newTok = new GrammarToken(g, ruleNode.RULE_REF().getSymbol());
+//					newTok.originalTokenIndex = Integer.valueOf(option.optionValue().getText());
+//					elWithOpt.token = newTok;
+//
+//					GrammarAST originalNode = g.ast.getNodeWithTokenIndex(newTok.getTokenIndex());
+//					if (originalNode != null) {
+//						// update the AST node start/stop index to match the values
+//						// of the corresponding node in the original parse tree.
+//						elWithOpt.setTokenStartIndex(originalNode.getTokenStartIndex());
+//						elWithOpt.setTokenStopIndex(originalNode.getTokenStopIndex());
+//					}
+//					else {
+//						// the original AST node could not be located by index;
+//						// make sure to assign valid values for the start/stop
+//						// index so toTokenString will not throw exceptions.
+//						elWithOpt.setTokenStartIndex(newTok.getTokenIndex());
+//						elWithOpt.setTokenStopIndex(newTok.getTokenIndex());
+//					}
+//				}
+//			}
+//		}
 	}
 
 	/** Merge all the rules, token definitions, and named actions from
@@ -132,33 +111,31 @@ public class GrammarTransformPipeline {
 		List<Grammar> imports = rootGrammar.getAllImportedGrammars();
 		if ( imports==null ) return;
 
-		GrammarAST root = rootGrammar.ast;
-		GrammarAST id = (GrammarAST) root.getChild(0);
-		GrammarASTAdaptor adaptor = new GrammarASTAdaptor(id.token.getInputStream());
+		GrammarRootAST root = rootGrammar.ast;
+		ANTLRParser.IdentifierContext id = root.root.grammarDecl().identifier();
 
-		GrammarAST channelsRoot = (GrammarAST)root.getFirstChildWithType(ANTLRParser.CHANNELS);
-	 	GrammarAST tokensRoot = (GrammarAST)root.getFirstChildWithType(ANTLRParser.TOKENS_SPEC);
+		List<ANTLRParser.ChannelsSpecContext> channelsRoot = root.getChannels();
+	 	List<ANTLRParser.TokensSpecContext> tokensRoot = root.getTokensSpecs();
 
-		List<GrammarAST> actionRoots = root.getNodesWithType(ANTLRParser.AT);
+		List<ANTLRParser.ActionBlockContext> actionRoots = root.getActions();
 
 		// Compute list of rules in root grammar and ensure we have a RULES node
-		GrammarAST RULES = (GrammarAST)root.getFirstChildWithType(ANTLRParser.RULES);
+		List<ANTLRParser.ParserRuleSpecContext> rootRules = root.getParserRules();
 		Set<String> rootRuleNames = new HashSet<String>();
 		// make list of rules we have in root grammar
-		List<GrammarAST> rootRules = RULES.getNodesWithType(ANTLRParser.RULE);
-		for (GrammarAST r : rootRules) rootRuleNames.add(r.getChild(0).getText());
+		for (ANTLRParser.ParserRuleSpecContext r : rootRules) rootRuleNames.add(r.RULE_REF().getText());
 
 		// make list of modes we have in root grammar
-		List<GrammarAST> rootModes = root.getNodesWithType(ANTLRParser.MODE);
+		Map<TerminalNode, List<ANTLRParser.LexerRuleSpecContext>> rootModes = root.getModes();
 		Set<String> rootModeNames = new HashSet<String>();
-		for (GrammarAST m : rootModes) rootModeNames.add(m.getChild(0).getText());
+		for (TerminalNode m : rootModes.keySet()) rootModeNames.add(m.getText());
 		List<GrammarAST> addedModes = new ArrayList<GrammarAST>();
 
 		for (Grammar imp : imports) {
 			// COPY CHANNELS
-			GrammarAST imp_channelRoot = (GrammarAST)imp.ast.getFirstChildWithType(ANTLRParser.CHANNELS);
+			List<ANTLRParser.ChannelsSpecContext> imp_channelRoot = imp.ast.getChannels();
 			if ( imp_channelRoot != null) {
-				rootGrammar.tool.log("grammar", "imported channels: "+imp_channelRoot.getChildren());
+				rootGrammar.tool.log("grammar", "imported channels: "+imp_channelRoot);
 				if (channelsRoot==null) {
 					channelsRoot = imp_channelRoot.dupTree();
 					channelsRoot.g = rootGrammar;

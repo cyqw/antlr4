@@ -1106,7 +1106,7 @@ public class Grammar implements AttributeResolver {
             case ANTLRParser.LEXER :
                 return "lexer";
             case ANTLRParser.PARSER :
-            case ANTLRParser.COMBINED :
+			case ANTLRParser.GRAMMAR :
                 return "parser";
         }
         return null;
@@ -1120,7 +1120,7 @@ public class Grammar implements AttributeResolver {
 
 	public boolean isLexer() { return getType()==ANTLRParser.LEXER; }
 	public boolean isParser() { return getType()==ANTLRParser.PARSER; }
-	public boolean isCombined() { return getType()==ANTLRParser.COMBINED; }
+	public boolean isCombined() { return getType()==ANTLRParser.GRAMMAR; }
 
 	/** Is id a valid token name? Does id start with an uppercase letter? */
 	public static boolean isTokenName(String id) {
@@ -1138,7 +1138,7 @@ public class Grammar implements AttributeResolver {
             case ANTLRParser.PARSER : return "Parser";
             // if combined grammar, gen Parser and Lexer will be done later
             // TODO: we are separate now right?
-            case ANTLRParser.COMBINED : return "Parser";
+			case ANTLRParser.GRAMMAR : return "Parser";
             default :
                 return "<invalid>";
         }

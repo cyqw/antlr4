@@ -159,7 +159,7 @@ public class RuleFunction extends OutputModelObject {
 
 		namedActions = new HashMap<String, Action>();
 		for (String name : r.namedActions.keySet()) {
-			ActionAST ast = r.namedActions.get(name);
+			ActionBlockContext ast = r.namedActions.get(name);
 			namedActions.put(name, new Action(factory, ast));
 		}
 	}

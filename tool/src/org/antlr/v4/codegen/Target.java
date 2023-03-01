@@ -11,14 +11,18 @@ import org.antlr.v4.codegen.model.RuleFunction;
 import org.antlr.v4.codegen.model.SerializedATN;
 import org.antlr.v4.misc.CharSupport;
 import org.antlr.v4.misc.Utils;
-import org.antlr.v4.parse.ANTLRParser;
 import org.antlr.v4.runtime.RuntimeMetaData;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.tool.ErrorType;
 import org.antlr.v4.tool.Grammar;
 import org.antlr.v4.tool.Rule;
 import org.antlr.v4.tool.ast.GrammarAST;
-import org.stringtemplate.v4.*;
+import org.stringtemplate.v4.NumberRenderer;
+import org.stringtemplate.v4.ST;
+import org.stringtemplate.v4.STErrorListener;
+import org.stringtemplate.v4.STGroup;
+import org.stringtemplate.v4.STGroupFile;
+import org.stringtemplate.v4.StringRenderer;
 import org.stringtemplate.v4.misc.STMessage;
 
 import java.util.HashMap;
@@ -534,40 +538,6 @@ public abstract class Target {
 	 *  @since 4.5
 	 */
 	public int getInlineTestSetWordSize() { return 64; }
-
-	public boolean grammarSymbolCausesIssueInGeneratedCode(GrammarAST idNode) {
-		switch (idNode.getParent().getType()) {
-			case ANTLRParser.ASSIGN:
-				switch (idNode.getParent().getParent().getType()) {
-					case ANTLRParser.ELEMENT_OPTIONS:
-					case ANTLRParser.OPTIONS:
-						return false;
-
-					default:
-						break;
-				}
-
-				break;
-
-			case ANTLRParser.AT:
-			case ANTLRParser.ELEMENT_OPTIONS:
-				return false;
-
-			case ANTLRParser.LEXER_ACTION_CALL:
-				if (idNode.getChildIndex() == 0) {
-					// first child is the command name which is part of the ANTLR language
-					return false;
-				}
-
-				// arguments to the command should be checked
-				break;
-
-			default:
-				break;
-		}
-
-		return getReservedWords().contains(idNode.getText());
-	}
 
 	@Deprecated
 	protected boolean visibleGrammarSymbolCausesIssueInGeneratedCode(GrammarAST idNode) {

@@ -67,7 +67,7 @@ public class LeftRecursiveRuleTransformer {
 		List<String> leftRecursiveRuleNames = new ArrayList<String>();
 		for (Rule r : rules) {
 			if ( !Grammar.isTokenName(r.name) ) {
-				if ( LeftRecursiveRuleAnalyzer.hasImmediateRecursiveRuleRefs(r.ast, r.name) ) {
+				if ( LeftRecursiveRuleAnalyzer.hasImmediateRecursiveRuleRefs(r.parserAst, r.name) ) {
 					boolean fitsPattern = translateLeftRecursiveRule(ast, (LeftRecursiveRule)r, language);
 					if ( fitsPattern ) {
 						leftRecursiveRuleNames.add(r.name);
@@ -96,10 +96,10 @@ public class LeftRecursiveRuleTransformer {
 											  String language)
 	{
 		//tool.log("grammar", ruleAST.toStringTree());
-		RuleAST prevRuleAST = r.ast;
-		String ruleName = prevRuleAST.getChild(0).getText();
+		ANTLRParser.ParserRuleSpecContext prevRuleAST = r.parserAst;
+		String ruleName = prevRuleAST.RULE_REF().getText();
 		LeftRecursiveRuleAnalyzer leftRecursiveRuleWalker =
-			new LeftRecursiveRuleAnalyzer(prevRuleAST, tool, ruleName, language);
+			new LeftRecursiveRuleAnalyzer(tool, ruleName, language);
 		boolean isLeftRec;
 		try {
 //			System.out.println("TESTING ---------------\n"+
@@ -112,7 +112,7 @@ public class LeftRecursiveRuleTransformer {
 		if ( !isLeftRec ) return false;
 
 		// replace old rule's AST; first create text of altered rule
-		GrammarAST RULES = (GrammarAST)ast.getFirstChildWithType(ANTLRParser.RULES);
+		List<ANTLRParser.ParserRuleSpecContext> RULES = ast.getParserRules();
 		String newRuleText = leftRecursiveRuleWalker.getArtificialOpPrecRule();
 //		System.out.println("created: "+newRuleText);
 		// now parse within the context of the grammar that originally created
@@ -183,21 +183,18 @@ public class LeftRecursiveRuleTransformer {
 		return true;
 	}
 
-	public RuleAST parseArtificialRule(final Grammar g, String ruleText) {
+	public ANTLRParser.RuleSpecContext parseArtificialRule(final Grammar g, String ruleText) {
 		CodePointCharStream input = CharStreams.fromString(ruleText);
 		ANTLRLexer lexer = new ANTLRLexer(input);
-		GrammarASTAdaptor adaptor = new GrammarASTAdaptor(input);
 		CommonTokenStream tokens = new CommonTokenStream(lexer);
 		ToolANTLRParser p = new ToolANTLRParser(tokens, tool);
 
 		Token ruleStart = null;
 		try {
-			ParserRuleReturnScope r = p.rule();
-			RuleAST tree = (RuleAST)r.getTree();
-			ruleStart = (Token)r.getStart();
-			GrammarTransformPipeline.setGrammarPtr(g, tree);
-			GrammarTransformPipeline.augmentTokensWithOriginalPosition(g, tree);
-			return tree;
+			ANTLRParser.RuleSpecContext r = p.ruleSpec();
+			ruleStart = r.getStart();
+			GrammarTransformPipeline.augmentTokensWithOriginalPosition(g, r);
+			return r;
 		}
 		catch (Exception e) {
 			tool.errMgr.toolError(ErrorType.INTERNAL_ERROR,

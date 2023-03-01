@@ -24,11 +24,11 @@ import java.util.List;
 public class Action extends RuleElement {
 	@ModelElement public List<ActionChunk> chunks;
 
-	public Action(OutputModelFactory factory, ActionAST ast) {
+	public Action(OutputModelFactory factory, ANTLRParser.ActionBlockContext ast) {
 		super(factory,ast);
 		RuleFunction rf = factory.getCurrentRuleFunction();
 		if (ast != null) {
-			chunks = ActionTranslator.translateAction(factory, rf, ast.token, ast);
+			chunks = ActionTranslator.translateAction(factory, rf, ast.BEGIN_ACTION().getSymbol(), ast);
 		}
 		else {
 			chunks = new ArrayList<ActionChunk>();

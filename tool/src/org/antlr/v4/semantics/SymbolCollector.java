@@ -55,7 +55,7 @@ public class SymbolCollector extends GrammarTreeVisitor {
 	@Override
 	public ErrorManager getErrorManager() { return errMgr; }
 
-	public void process(GrammarRootAST ast) { visitGrammar(ast); }
+	public void process(GrammarRootAST ast) { }
 
 //	@Override
 //	public void globalNamedAction(GrammarAST scope, GrammarAST ID, ActionAST action) {

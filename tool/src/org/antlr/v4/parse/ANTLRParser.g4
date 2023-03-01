@@ -5,7 +5,7 @@
  *  Copyright (c) 2015 Gerald Rosenberg
  *  All rights reserved.
  *
- *  Redistribution and use in source and binary forms, with or withmout
+ *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions
  *  are met:
  *
@@ -41,9 +41,6 @@ parser grammar ANTLRParser;
 
 
 options { tokenVocab = ANTLRLexer; }
-
-tokens { RULE, RULES, BLOCK, CLOSURE, WILDCARD, COMBINED, ACTION,POSITIVE_CLOSURE,
- OPTIONAL, ARG_ACTION, ELEMENT_OPTIONS, LEXER_ALT_ACTION, LEXER_ACTION_CALL }
 // The main entry point for parsing a v4 grammar.
 grammarSpec
    : grammarDecl prequelConstruct* rules modeSpec* EOF

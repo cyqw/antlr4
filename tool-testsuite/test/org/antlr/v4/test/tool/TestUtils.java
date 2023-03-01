@@ -2,7 +2,9 @@ package org.antlr.v4.test.tool;
 
 import org.antlr.runtime.Token;
 import org.antlr.v4.misc.Utils;
-import org.antlr.v4.tool.ast.GrammarAST;
+import org.antlr.v4.runtime.CommonToken;
+import org.antlr.v4.runtime.tree.TerminalNode;
+import org.antlr.v4.runtime.tree.TerminalNodeImpl;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -33,10 +35,10 @@ public class TestUtils {
 
 	@Test
 	public void testNodesToStrings() {
-		ArrayList<GrammarAST> values = new ArrayList<>();
-		values.add(new GrammarAST(Token.EOR_TOKEN_TYPE));
-		values.add(new GrammarAST(Token.DOWN));
-		values.add(new GrammarAST(Token.UP));
+		ArrayList<TerminalNode> values = new ArrayList<>();
+		values.add(new TerminalNodeImpl(new CommonToken(Token.EOR_TOKEN_TYPE)));
+		values.add(new TerminalNodeImpl(new CommonToken(Token.DOWN)));
+		values.add(new TerminalNodeImpl(new CommonToken(Token.UP)));
 
 		assertNull(Utils.nodesToStrings(null));
 		assertNotNull(Utils.nodesToStrings(values));
