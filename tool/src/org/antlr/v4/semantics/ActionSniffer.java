@@ -6,6 +6,7 @@
 
 package org.antlr.v4.semantics;
 
+import org.antlr.v4.parse.ActionSplitter;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.Token;

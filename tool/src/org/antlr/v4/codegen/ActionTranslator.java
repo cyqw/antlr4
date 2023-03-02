@@ -10,6 +10,7 @@ import org.antlr.v4.codegen.model.RuleFunction;
 import org.antlr.v4.codegen.model.chunk.*;
 import org.antlr.v4.codegen.model.decl.StructDecl;
 import org.antlr.v4.parse.ANTLRParser;
+import org.antlr.v4.parse.ActionSplitter;
 import org.antlr.v4.parse.ActionSplitterListener;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;

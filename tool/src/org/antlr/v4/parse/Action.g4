@@ -28,33 +28,20 @@
  *  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-lexer grammar ActionSplitter;
+grammar Action;
 
-options { filter=true; }
 
-@header {
-package org.antlr.v4.parse;
+@parser::header {
 import org.antlr.v4.tool.*;
 import org.antlr.v4.tool.ast.*;
 }
 
-@members {
+@parser::members {
 ActionSplitterListener delegate;
 
-public ActionSplitter(CharStream input, ActionSplitterListener delegate) {
-    this(input, new RecognizerSharedState());
+public ActionParser(TokenStream input, ActionSplitterListener delegate) {
+    this(input);
     this.delegate = delegate;
-}
-
-/** force filtering (and return tokens). triggers all above actions. */
-public List<Token> getActionTokens() {
-    List<Token> chunks = new ArrayList<Token>();
-    Token t = nextToken();
-    while ( t.getType()!=Token.EOF ) {
-        chunks.add(t);
-        t = nextToken();
-    }
-    return chunks;
 }
 
 private boolean isIDStartChar(int c) {
@@ -62,64 +49,64 @@ private boolean isIDStartChar(int c) {
 }
 }
 
+action: (comment | line_comment | set_nonlocal_attr |nonlocal_attr | qualified_attr|set_attr|set_nonlocal_attr|text_)+;
 // ignore comments right away
 
-COMMENT
-    :   '/*' ( options {greedy=false;} : . )* '*/' {delegate.text($text);}
+comment
+    :   '/*' .*? '*/' {delegate.text($text);}
     ;
 
-LINE_COMMENT
+line_comment
     : '//' ~('\n'|'\r')* '\r'? '\n' {delegate.text($text);}
     ;
 
-SET_NONLOCAL_ATTR
+set_nonlocal_attr
 	:	'$' x=ID '::' y=ID WS? '=' expr=ATTR_VALUE_EXPR ';'
 		{
 		delegate.setNonLocalAttr($text, $x, $y, $expr);
 		}
 	;
 
-NONLOCAL_ATTR
+nonlocal_attr
 	:	'$' x=ID '::' y=ID {delegate.nonLocalAttr($text, $x, $y);}
 	;
 
-QUALIFIED_ATTR
-	:	'$' x=ID '.' y=ID {input.LA(1)!='('}? {delegate.qualifiedAttr($text, $x, $y);}
+qualified_attr
+	:	'$' x=ID '.' y=ID {_input.LA(1)!='('}? {delegate.qualifiedAttr($text, $x, $y);}
 	;
 
-SET_ATTR
+set_attr
 	:	'$' x=ID WS? '=' expr=ATTR_VALUE_EXPR ';'
 		{
 		delegate.setAttr($text, $x, $expr);
 		}
 	;
 
-ATTR
+attr
 	:	'$' x=ID {delegate.attr($text, $x);}
 	;
 
 // Anything else is just random text
-TEXT
-@init {StringBuilder buf = new StringBuilder();}
-@after {delegate.text(buf.toString());}
-	:	(	c=~('\\'| '$') {buf.append((char)$c);}
+
+text_
+	:
+{StringBuilder buf = new StringBuilder();}
+		(	c=~('\\'| '$') {buf.append($c);}
 		|	'\\$' {buf.append('$');}
-		|	'\\' c=~('$') {buf.append('\\').append((char)$c);}
-		|	{!isIDStartChar(input.LA(2))}? => '$' {buf.append('$');}
+		|	'\\' c=~('$') {buf.append('\\').append($c);}
+		|	{!isIDStartChar(_input.LA(2))}? '$' {buf.append('$');}
 		)+
+{delegate.text(buf.toString());}
 	;
 
-fragment
 ID  :	('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'0'..'9'|'_')*
     ;
 
 /** Don't allow an = as first char to prevent $x == 3; kind of stuff. */
-fragment
 ATTR_VALUE_EXPR
 	:	~'=' (~';')*
 	;
 
-fragment
 WS	:	(' '|'\t'|'\n'|'\r')+
 	;
 

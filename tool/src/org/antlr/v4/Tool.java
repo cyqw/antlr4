@@ -731,7 +731,7 @@ public class Tool {
 			return new StringWriter();
 		}
 		// output directory is a function of where the grammar file lives
-		// for subdir/T.g4, you get subdir here.  Well, depends on -o etc...
+		// for subdir/A.g4, you get subdir here.  Well, depends on -o etc...
 		File outputDir = getOutputDirectory(g.fileName);
 		File outputFile = new File(outputDir, fileName);
 

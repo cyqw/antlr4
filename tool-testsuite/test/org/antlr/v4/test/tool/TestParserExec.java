@@ -62,7 +62,7 @@ public class TestParserExec {
 			"ID : 'a'..'z'+ ;\n"+
 			"INT : '0'..'9'+ ;\n"+
 			"WS : (' '|'\\t'|'\\n')+ -> skip ;\n";
-		ExecutedState executedState = execParser("T.g4", grammar, "TParser", "TLexer",
+		ExecutedState executedState = execParser("A.g4", grammar, "TParser", "TLexer",
 				"s", "abc 34", true);
 		String expecting =
 			"Decision 0:\n" +

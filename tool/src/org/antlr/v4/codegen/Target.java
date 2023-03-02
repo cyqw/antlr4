@@ -454,7 +454,7 @@ public abstract class Target {
 		return getTokenTypeAsTargetLabel(getCodeGenerator().g, ttype);
 	}
 
-	/** Generate TParser.java and TLexer.java from T.g4 if combined, else
+	/** Generate TParser.java and TLexer.java from A.g4 if combined, else
 	 *  just use T.java as output regardless of type.
 	 */
 	public String getRecognizerFileName(boolean header) {

@@ -24,7 +24,7 @@ public class TestLeftRecursionToolIssues {
 			"ID : 'a'..'z'+ ;\n" +
 			"WS : (' '|'\\n') -> skip ;\n";
 		String expected =
-			"error(" + ErrorType.NO_NON_LR_ALTS.code + "): T.g4:3:0: left recursive rule a must contain an alternative which is not left recursive\n";
+			"error(" + ErrorType.NO_NON_LR_ALTS.code + "): A.g4:3:0: left recursive rule a must contain an alternative which is not left recursive\n";
 		testErrors(new String[] { grammar, expected }, false);
 	}
 
@@ -38,7 +38,7 @@ public class TestLeftRecursionToolIssues {
 			"ID : 'a'..'z'+ ;\n" +
 			"WS : (' '|'\\n') -> skip ;\n";
 		String expected =
-			"error(" + ErrorType.EPSILON_LR_FOLLOW.code + "): T.g4:3:0: left recursive rule a contains a left recursive alternative which can be followed by the empty string\n";
+			"error(" + ErrorType.EPSILON_LR_FOLLOW.code + "): A.g4:3:0: left recursive rule a contains a left recursive alternative which can be followed by the empty string\n";
 		testErrors(new String[] { grammar, expected }, false);
 	}
 
@@ -58,7 +58,7 @@ public class TestLeftRecursionToolIssues {
 			"    : 'dummy'\n" +
 			"    ;\n";
 		String expected =
-			"error(" + ErrorType.NONCONFORMING_LR_RULE.code + "): T.g4:6:0: rule expressionA is left recursive but doesn't conform to a pattern ANTLR can handle\n";
+			"error(" + ErrorType.NONCONFORMING_LR_RULE.code + "): A.g4:6:0: rule expressionA is left recursive but doesn't conform to a pattern ANTLR can handle\n";
 		testErrors(new String[]{grammar, expected}, false);
 	}
 
@@ -70,7 +70,7 @@ public class TestLeftRecursionToolIssues {
 			"  | a[3] 'y'\n" +
 			"  ;";
 		String expected =
-			"error(" + ErrorType.NONCONFORMING_LR_RULE.code + "): T.g4:2:0: rule a is left recursive but doesn't conform to a pattern ANTLR can handle\n";
+			"error(" + ErrorType.NONCONFORMING_LR_RULE.code + "): A.g4:2:0: rule a is left recursive but doesn't conform to a pattern ANTLR can handle\n";
 		testErrors(new String[]{grammar, expected}, false);
 	}
 
@@ -82,7 +82,7 @@ public class TestLeftRecursionToolIssues {
 			"  | a[3] 'y'\n" +
 			"  ;";
 		String expected =
-			"error(" + ErrorType.NONCONFORMING_LR_RULE.code + "): T.g4:2:0: rule a is left recursive but doesn't conform to a pattern ANTLR can handle\n";
+			"error(" + ErrorType.NONCONFORMING_LR_RULE.code + "): A.g4:2:0: rule a is left recursive but doesn't conform to a pattern ANTLR can handle\n";
 		testErrors(new String[]{grammar, expected}, false);
 	}
 
@@ -93,7 +93,7 @@ public class TestLeftRecursionToolIssues {
 			"a : a | b ;\n" +
 			"b : 'B' ;\n";
 		String expected =
-			"error(" + ErrorType.NONCONFORMING_LR_RULE.code + "): T.g4:2:0: rule a is left recursive but doesn't conform to a pattern ANTLR can handle\n";
+			"error(" + ErrorType.NONCONFORMING_LR_RULE.code + "): A.g4:2:0: rule a is left recursive but doesn't conform to a pattern ANTLR can handle\n";
 		testErrors(new String[]{grammar, expected}, false);
 	}
 

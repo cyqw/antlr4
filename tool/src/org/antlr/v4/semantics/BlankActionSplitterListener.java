@@ -6,8 +6,8 @@
 
 package org.antlr.v4.semantics;
 
-import org.antlr.v4.runtime.Token;
 import org.antlr.v4.parse.ActionSplitterListener;
+import org.antlr.v4.runtime.Token;
 
 public class BlankActionSplitterListener implements ActionSplitterListener {
 	@Override
