@@ -7,7 +7,6 @@
 package org.antlr.v4.codegen.model;
 
 import org.antlr.v4.codegen.OutputModelFactory;
-import org.antlr.v4.parse.ANTLRParser;
 import org.antlr.v4.tool.ast.GrammarAST;
 
 /** */
@@ -19,7 +18,7 @@ public abstract class OutputModelObject {
 
 	public OutputModelObject(OutputModelFactory factory) { this(factory, null); }
 
-	public OutputModelObject(OutputModelFactory factory, ANTLRParser.ActionBlockContext ast) {
+	public OutputModelObject(OutputModelFactory factory, GrammarAST ast) {
 		this.factory = factory;
 		this.ast = ast;
 	}

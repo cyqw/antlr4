@@ -6,6 +6,9 @@
 
 package org.antlr.v4.codegen.model;
 
+import org.antlr.runtime.RecognitionException;
+import org.antlr.runtime.tree.CommonTree;
+import org.antlr.runtime.tree.CommonTreeNodeStream;
 import org.antlr.v4.codegen.OutputModelFactory;
 import org.antlr.v4.codegen.model.decl.AltLabelStructDecl;
 import org.antlr.v4.codegen.model.decl.AttributeDecl;
@@ -20,14 +23,11 @@ import org.antlr.v4.codegen.model.decl.StructDecl;
 import org.antlr.v4.misc.FrequencySet;
 import org.antlr.v4.misc.Utils;
 import org.antlr.v4.parse.GrammarASTAdaptor;
-import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.atn.ATNState;
 import org.antlr.v4.runtime.misc.IntervalSet;
 import org.antlr.v4.runtime.misc.OrderedHashSet;
 import org.antlr.v4.runtime.misc.Pair;
-import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.tool.Attribute;
-import org.antlr.v4.tool.CommonTreeNodeStream;
 import org.antlr.v4.tool.ErrorType;
 import org.antlr.v4.tool.Rule;
 import org.antlr.v4.tool.ast.ActionAST;
@@ -44,7 +44,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.antlr.v4.parse.ANTLRParser.*;
+import static org.antlr.v4.parse.ANTLRParser.RULE_REF;
+import static org.antlr.v4.parse.ANTLRParser.STRING_LITERAL;
+import static org.antlr.v4.parse.ANTLRParser.TOKEN_REF;
 
 /** */
 public class RuleFunction extends OutputModelObject {
@@ -159,7 +161,7 @@ public class RuleFunction extends OutputModelObject {
 
 		namedActions = new HashMap<String, Action>();
 		for (String name : r.namedActions.keySet()) {
-			ActionBlockContext ast = r.namedActions.get(name);
+			ActionAST ast = r.namedActions.get(name);
 			namedActions.put(name, new Action(factory, ast));
 		}
 	}
@@ -222,7 +224,7 @@ public class RuleFunction extends OutputModelObject {
 	private List<GrammarAST> getRuleTokens(List<GrammarAST> refs) {
 		List<GrammarAST> result = new ArrayList<>(refs.size());
 		for (GrammarAST ref : refs) {
-			ParseTree r = ref;
+			CommonTree r = ref;
 
 			boolean ignore = false;
 			while (r != null) {
@@ -231,7 +233,7 @@ public class RuleFunction extends OutputModelObject {
 					ignore = true;
 					break;
 				}
-				r = r.getParent();
+				r = r.parent;
 			}
 
 			if (!ignore) {

@@ -45,7 +45,7 @@ public class ActionSniffer extends BlankActionSplitterListener {
 		CharStream in = CharStreams.fromString(actionToken.getText());
 		ActionSplitter splitter = new ActionSplitter(in, this);
 		// forces eval, triggers listener methods
-		node.chunks = splitter.getActionTokens();
+		splitter.getActionTokens();
 	}
 
 	public void processNested(Token actionToken) {

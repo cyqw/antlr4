@@ -6,10 +6,10 @@
 
 package org.antlr.v4.semantics;
 
+import org.antlr.v4.parse.ANTLRParser;
 import org.antlr.v4.parse.GrammarTreeVisitor;
 import org.antlr.v4.tool.ErrorManager;
 import org.antlr.v4.tool.Grammar;
-import org.antlr.v4.tool.Rule;
 import org.antlr.v4.tool.ast.ActionAST;
 import org.antlr.v4.tool.ast.GrammarAST;
 import org.antlr.v4.tool.ast.GrammarRootAST;
@@ -33,19 +33,16 @@ public class SymbolCollector extends GrammarTreeVisitor {
 	// stuff to collect
 	public List<GrammarAST> rulerefs = new ArrayList<GrammarAST>();
 	public List<GrammarAST> qualifiedRulerefs = new ArrayList<GrammarAST>();
-	public List<GrammarAST> terminals = new ArrayList<GrammarAST>();
-	public List<GrammarAST> tokenIDRefs = new ArrayList<GrammarAST>();
+	public List<ANTLRParser.TokensSpecContext> terminals = new ArrayList<ANTLRParser.TokensSpecContext>();
+	public List<ANTLRParser.TokensSpecContext> tokenIDRefs = new ArrayList<ANTLRParser.TokensSpecContext>();
 	public Set<String> strings = new HashSet<String>();
-	public List<GrammarAST> tokensDefs = new ArrayList<GrammarAST>();
-	public List<GrammarAST> channelDefs = new ArrayList<GrammarAST>();
+	public List<ANTLRParser.TokensSpecContext> tokensDefs = new ArrayList<ANTLRParser.TokensSpecContext>();
+	public List<ANTLRParser.ChannelsSpecContext> channelDefs = new ArrayList<ANTLRParser.ChannelsSpecContext>();
 
 	/** Track action name node in @parser::members {...} or @members {...} */
-	List<GrammarAST> namedActions = new ArrayList<GrammarAST>();
+	List<ANTLRParser.Action_Context> namedActions = new ArrayList<ANTLRParser.Action_Context>();
 
 	public ErrorManager errMgr;
-
-	// context
-	public Rule currentRule;
 
 	public SymbolCollector(Grammar g) {
 		this.g = g;
@@ -55,132 +52,51 @@ public class SymbolCollector extends GrammarTreeVisitor {
 	@Override
 	public ErrorManager getErrorManager() { return errMgr; }
 
-	public void process(GrammarRootAST ast) { }
+	public void process(GrammarRootAST ast) {
+		ast.getActions().forEach(this::globalNamedAction);
+		ast.getTokensSpecs().forEach(this::defineToken);
+		ast.getChannels().forEach(this::defineChannel);
+	}
 
-//	@Override
-//	public void globalNamedAction(GrammarAST scope, GrammarAST ID, ActionAST action) {
-//		action.setScope(scope);
-//		namedActions.add((GrammarAST)ID.getParent());
-//		action.resolver = g;
-//	}
+	public void globalNamedAction(ANTLRParser.ActionBlockContext ast) {
+		if (ast.getParent() instanceof ANTLRParser.Action_Context) {
+			namedActions.add((ANTLRParser.Action_Context)ast.getParent());
+		}
+	}
 
-//	@Override
-//	public void defineToken(GrammarAST ID) {
-//		terminals.add(ID);
-//		tokenIDRefs.add(ID);
-//		tokensDefs.add(ID);
-//	}
+	public void defineToken(ANTLRParser.TokensSpecContext ID) {
+		terminals.add(ID);
+		tokenIDRefs.add(ID);
+		tokensDefs.add(ID);
+	}
 
-//	@Override
-//	public void defineChannel(GrammarAST ID) {
-//		channelDefs.add(ID);
-//	}
+	public void defineChannel(ANTLRParser.ChannelsSpecContext ID) {
+		channelDefs.add(ID);
+	}
 
-//	@Override
-//	public void discoverRule(RuleAST rule, GrammarAST ID,
-//							 List<GrammarAST> modifiers, ActionAST arg,
-//							 ActionAST returns, GrammarAST thrws,
-//							 GrammarAST options, ActionAST locals,
-//							 List<GrammarAST> actions,
-//							 GrammarAST block)
-//	{
-//		currentRule = g.getRule(ID.getText());
-//	}
-
-//	@Override
-//	public void discoverLexerRule(RuleAST rule, GrammarAST ID, List<GrammarAST> modifiers, GrammarAST options,
-//								  GrammarAST block)
-//	{
-//		currentRule = g.getRule(ID.getText());
-//	}
-
-//	@Override
-//	public void discoverOuterAlt(AltAST alt) {
-//		currentRule.alt[currentOuterAltNumber].ast = alt;
-//	}
-
-//	@Override
-//	public void actionInAlt(ActionAST action) {
-//		currentRule.defineActionInAlt(currentOuterAltNumber, action);
-//		action.resolver = currentRule.alt[currentOuterAltNumber];
-//	}
-
-//	@Override
-//	public void sempredInAlt(PredAST pred) {
-//		currentRule.definePredicateInAlt(currentOuterAltNumber, pred);
-//		pred.resolver = currentRule.alt[currentOuterAltNumber];
-//	}
-
-//	@Override
-//	public void ruleCatch(GrammarAST arg, ActionAST action) {
-//		GrammarAST catchme = (GrammarAST)action.getParent();
-//		currentRule.exceptions.add(catchme);
-//		action.resolver = currentRule;
-//	}
-
-//	@Override
-//	public void finallyAction(ActionAST action) {
-//		currentRule.finallyAction = action;
-//		action.resolver = currentRule;
-//	}
-
-//	@Override
-//	public void label(GrammarAST op, GrammarAST ID, GrammarAST element) {
-//		LabelElementPair lp = new LabelElementPair(g, ID, element, op.getType());
-//		currentRule.alt[currentOuterAltNumber].labelDefs.map(ID.getText(), lp);
-//	}
-
-	@Override
 	public void stringRef(TerminalAST ref) {
 		terminals.add(ref);
 		strings.add(ref.getText());
-		if ( currentRule!=null ) {
-			currentRule.alt[currentOuterAltNumber].tokenRefs.map(ref.getText(), ref);
-		}
+
 	}
 
-	@Override
 	public void tokenRef(TerminalAST ref) {
 		terminals.add(ref);
 		tokenIDRefs.add(ref);
-		if ( currentRule!=null ) {
-			currentRule.alt[currentOuterAltNumber].tokenRefs.map(ref.getText(), ref);
-		}
+
 	}
 
-	@Override
+
 	public void ruleRef(GrammarAST ref, ActionAST arg) {
 //		if ( inContext("DOT ...") ) qualifiedRulerefs.add((GrammarAST)ref.getParent());
 		rulerefs.add(ref);
-    	if ( currentRule!=null ) {
-    		currentRule.alt[currentOuterAltNumber].ruleRefs.map(ref.getText(), ref);
-    	}
+
 	}
 
-//	@Override
-//	public void grammarOption(GrammarAST ID, GrammarAST valueAST) {
-//		setActionResolver(valueAST);
-//	}
 
-//	@Override
-//	public void ruleOption(GrammarAST ID, GrammarAST valueAST) {
-//		setActionResolver(valueAST);
-//	}
 
-//	@Override
-//	public void blockOption(GrammarAST ID, GrammarAST valueAST) {
-//		setActionResolver(valueAST);
-//	}
 
-//	@Override
-//	public void elementOption(GrammarASTWithOptions t, GrammarAST ID, GrammarAST valueAST) {
-//		setActionResolver(valueAST);
-//	}
 
-	/** In case of option id={...}, set resolve in case they use $foo */
-	private void setActionResolver(GrammarAST valueAST) {
-		if ( valueAST instanceof ActionAST) {
-			((ActionAST)valueAST).resolver = currentRule.alt[currentOuterAltNumber];
-		}
-	}
+
+
 }

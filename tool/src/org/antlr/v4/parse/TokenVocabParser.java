@@ -11,7 +11,6 @@ import org.antlr.v4.Tool;
 import org.antlr.v4.codegen.CodeGenerator;
 import org.antlr.v4.tool.ErrorType;
 import org.antlr.v4.tool.Grammar;
-import org.antlr.v4.tool.ast.GrammarAST;
 
 import java.io.BufferedReader;
 import java.io.File;

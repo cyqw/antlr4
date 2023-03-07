@@ -6,6 +6,7 @@
 
 package org.antlr.v4.semantics;
 
+import org.antlr.v4.parse.ANTLRParser;
 import org.antlr.v4.parse.ActionSplitter;
 import org.antlr.v4.parse.ActionSplitterListener;
 import org.antlr.v4.runtime.CharStream;
@@ -50,7 +51,7 @@ public class AttributeChecks implements ActionSplitterListener {
         }
 
         for (Rule r : g.rules.values()) {
-            for (ActionAST a : r.namedActions.values()) {
+            for (ANTLRParser.ActionBlockContext a : r.namedActions.values()) {
                 AttributeChecks checker = new AttributeChecks(g, r, null, a, a.token);
                 checker.examineAction();
             }
@@ -80,7 +81,7 @@ public class AttributeChecks implements ActionSplitterListener {
         CharStream in = CharStreams.fromString(actionToken.getText());
         ActionSplitter splitter = new ActionSplitter(in, this);
 		// forces eval, triggers listener methods
-        node.chunks = splitter.getActionTokens();
+        splitter.getActionTokens();
     }
 
     // LISTENER METHODS

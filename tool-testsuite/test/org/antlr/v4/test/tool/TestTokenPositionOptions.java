@@ -10,7 +10,6 @@ import org.antlr.v4.misc.Utils;
 import org.antlr.v4.parse.ANTLRParser;
 import org.antlr.v4.runtime.misc.IntervalSet;
 import org.antlr.v4.tool.Grammar;
-import org.antlr.v4.tool.ast.GrammarAST;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;

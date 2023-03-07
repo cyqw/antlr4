@@ -2,10 +2,9 @@ package org.antlr.v4.parse;
 
 import org.antlr.v4.automata.ATNFactory;
 import org.antlr.v4.automata.ParserATNFactory;
-import org.antlr.v4.tool.CommonTreeNodeStream;
 
 public class ATNBuilder {
-	public ATNBuilder(CommonTreeNodeStream nodes, ParserATNFactory parserATNFactory) {
+	public ATNBuilder(ANTLRParser.RuleBlockContext nodes, ParserATNFactory parserATNFactory) {
 
 	}
 

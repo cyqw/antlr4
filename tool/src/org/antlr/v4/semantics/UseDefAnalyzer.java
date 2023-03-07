@@ -6,7 +6,6 @@
 
 package org.antlr.v4.semantics;
 
-import org.antlr.v4.parse.ANTLRParser;
 import org.antlr.v4.parse.ActionSplitter;
 import org.antlr.v4.parse.ActionSplitterListener;
 import org.antlr.v4.runtime.CharStream;
@@ -14,17 +13,8 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.tool.Alternative;
 import org.antlr.v4.tool.Grammar;
-import org.antlr.v4.tool.LexerGrammar;
 import org.antlr.v4.tool.Rule;
 import org.antlr.v4.tool.ast.ActionAST;
-import org.antlr.v4.tool.ast.GrammarAST;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /** Look for errors and deadcode stuff */
 public class UseDefAnalyzer {
@@ -64,31 +54,5 @@ public class UseDefAnalyzer {
 		return dependent[0];
 	}
 
-	/** Find all rules reachable from r directly or indirectly for all r in g */
-	public static Map<Rule, Set<Rule>> getRuleDependencies(Grammar g) {
-		return getRuleDependencies(g, g.rules.values());
-	}
-
-	public static Map<Rule, Set<Rule>> getRuleDependencies(LexerGrammar g, String modeName) {
-		return getRuleDependencies(g, g.modes.get(modeName));
-	}
-
-	public static Map<Rule, Set<Rule>> getRuleDependencies(Grammar g, Collection<Rule> rules) {
-		Map<Rule, Set<Rule>> dependencies = new HashMap<Rule, Set<Rule>>();
-
-		for (Rule r : rules) {
-			List<GrammarAST> tokenRefs = r.ast.getNodesWithType(ANTLRParser.TOKEN_REF);
-			for (GrammarAST tref : tokenRefs) {
-				Set<Rule> calls = dependencies.get(r);
-				if ( calls==null ) {
-					calls = new HashSet<Rule>();
-					dependencies.put(r, calls);
-				}
-				calls.add(g.getRule(tref.getText()));
-			}
-		}
-
-		return dependencies;
-	}
 
 }

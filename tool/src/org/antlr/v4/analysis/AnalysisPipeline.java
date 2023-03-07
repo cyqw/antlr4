@@ -14,7 +14,6 @@ import org.antlr.v4.runtime.misc.IntervalSet;
 import org.antlr.v4.tool.ErrorType;
 import org.antlr.v4.tool.Grammar;
 import org.antlr.v4.tool.Rule;
-import org.antlr.v4.tool.ast.GrammarAST;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -51,7 +50,7 @@ public class AnalysisPipeline {
 			LL1Analyzer analyzer = new LL1Analyzer(g.atn);
 			IntervalSet look = analyzer.LOOK(g.atn.ruleToStartState[rule.index], null);
 			if (look.contains(Token.EPSILON)) {
-				g.tool.errMgr.grammarError(ErrorType.EPSILON_TOKEN, g.fileName, ((GrammarAST)rule.ast.getChild(0)).getToken(), rule.name);
+				g.tool.errMgr.grammarError(ErrorType.EPSILON_TOKEN, g.fileName, rule.lexerAst.TOKEN_REF().getSymbol(), rule.name);
 			}
 		}
 	}

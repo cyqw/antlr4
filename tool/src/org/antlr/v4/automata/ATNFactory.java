@@ -43,9 +43,6 @@ public interface ATNFactory {
 	void setCurrentOuterAlt(int alt);
 
 
-	Handle rule(GrammarAST ruleAST, String name, Handle blk);
-
-
 	ATNState newState();
 
 

@@ -308,7 +308,7 @@ public class ParserFactory extends DefaultOutputModelFactory {
 
 	public void defineImplicitLabel(GrammarAST ast, LabeledOp op) {
 		Decl d;
-		if ( false) {//ast.getType()==ANTLRParser.SET || ast.getType()==ANTLRParser.WILDCARD ) {
+		if ( ast.getType()==ANTLRParser.SET || ast.getType()==ANTLRParser.WILDCARD ) {
 			String implLabel =
 				gen.getTarget().getImplicitSetLabel(String.valueOf(ast.token.getTokenIndex()));
 			d = getTokenLabelDecl(implLabel);

@@ -11,7 +11,6 @@ import org.antlr.v4.analysis.LeftRecursiveRuleTransformer;
 import org.antlr.v4.misc.CharSupport;
 import org.antlr.v4.parse.ANTLRParser;
 import org.antlr.v4.parse.ATNBuilder;
-import org.antlr.v4.parse.GrammarASTAdaptor;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.atn.ATN;
@@ -43,8 +42,8 @@ import org.antlr.v4.runtime.atn.Transition;
 import org.antlr.v4.runtime.atn.WildcardTransition;
 import org.antlr.v4.runtime.misc.IntervalSet;
 import org.antlr.v4.runtime.misc.Triple;
+import org.antlr.v4.runtime.tree.Tree;
 import org.antlr.v4.semantics.UseDefAnalyzer;
-import org.antlr.v4.tool.CommonTreeNodeStream;
 import org.antlr.v4.tool.ErrorManager;
 import org.antlr.v4.tool.ErrorType;
 import org.antlr.v4.tool.Grammar;
@@ -123,7 +122,7 @@ public class ParserATNFactory implements ATNFactory {
 
 				LL1Analyzer analyzer = new LL1Analyzer(atn);
 				if (analyzer.LOOK(startState, pair.c, null).contains(org.antlr.v4.runtime.Token.EPSILON)) {
-					g.tool.errMgr.grammarError(ErrorType.EPSILON_OPTIONAL, g.fileName, ((GrammarAST)pair.a.ast.getChild(0)).getToken(), pair.a.name);
+					g.tool.errMgr.grammarError(ErrorType.EPSILON_OPTIONAL, g.fileName, pair.a.parserAst.RULE_REF().getSymbol(), pair.a.name);
 					continue optionalCheck;
 				}
 			}
@@ -144,10 +143,10 @@ public class ParserATNFactory implements ATNFactory {
 			IntervalSet lookahead = analyzer.LOOK(blkStart, blkStop, null);
 			if ( lookahead.contains(org.antlr.v4.runtime.Token.EPSILON)) {
 				ErrorType errorType = pair.a instanceof LeftRecursiveRule ? ErrorType.EPSILON_LR_FOLLOW : ErrorType.EPSILON_CLOSURE;
-				g.tool.errMgr.grammarError(errorType, g.fileName, ((GrammarAST)pair.a.ast.getChild(0)).getToken(), pair.a.name);
+				g.tool.errMgr.grammarError(errorType, g.fileName, pair.a.parserAst.RULE_REF().getSymbol(), pair.a.name);
 			}
 			if ( lookahead.contains(org.antlr.v4.runtime.Token.EOF)) {
-				g.tool.errMgr.grammarError(ErrorType.EOF_CLOSURE, g.fileName, ((GrammarAST)pair.a.ast.getChild(0)).getToken(), pair.a.name);
+				g.tool.errMgr.grammarError(ErrorType.EOF_CLOSURE, g.fileName, pair.a.parserAst.RULE_REF().getSymbol(), pair.a.name);
 			}
 		}
 	}
@@ -155,16 +154,14 @@ public class ParserATNFactory implements ATNFactory {
 	protected void _createATN(Collection<Rule> rules) {
 		createRuleStartAndStopATNStates();
 
-		GrammarASTAdaptor adaptor = new GrammarASTAdaptor();
 		for (Rule r : rules) {
 			// find rule's block
-			GrammarAST blk = (GrammarAST)r.ast.(ANTLRParser.BLOCK);
-			CommonTreeNodeStream nodes = new CommonTreeNodeStream(adaptor,blk);
-			ATNBuilder b = new ATNBuilder(nodes,this);
+			ANTLRParser.RuleBlockContext blk = r.parserAst.ruleBlock();
+			ATNBuilder b = new ATNBuilder(blk,this);
 			try {
 				setCurrentRuleName(r.name);
 				Handle h = b.ruleBlock(null);
-				rule(r.ast, r.name, h);
+				rule(r.parserAst, r.name, h);
 			}
 			catch (RecognitionException re) {
 				ErrorManager.fatalInternalError("bad grammar AST structure", re);
@@ -771,7 +768,7 @@ public class ParserATNFactory implements ATNFactory {
 			if ( !(alt instanceof AltAST) ) continue;
 			AltAST altAST = (AltAST)alt;
 			if ( altAST.getChildCount()==1 || (altAST.getChildCount() == 2 && altAST.getChild(0).getType() == ANTLRParser.ELEMENT_OPTIONS) ) {
-				GrammarAST e = altAST.getChild(altAST.getChildCount() - 1);
+				Tree e = altAST.getChild(altAST.getChildCount() - 1);
 				if ( e.getType()==ANTLRParser.WILDCARD ) {
 					return true;
 				}

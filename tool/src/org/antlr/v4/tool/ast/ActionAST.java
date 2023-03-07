@@ -6,6 +6,7 @@
 
 package org.antlr.v4.tool.ast;
 
+import org.antlr.v4.parse.ANTLRParser;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.tool.AttributeResolver;
 
@@ -13,7 +14,7 @@ import java.util.List;
 
 public class ActionAST extends GrammarASTWithOptions implements RuleElementAST {
     // Alt, rule, grammar space
-	GrammarAST scope = null;
+	ANTLRParser.ActionScopeNameContext scope = null;
 	public AttributeResolver resolver;
 	public List<Token> chunks; // useful for ANTLR IDE developers
 
@@ -33,11 +34,11 @@ public class ActionAST extends GrammarASTWithOptions implements RuleElementAST {
 	@Override
 	public Object visit(GrammarASTVisitor v) { return v.visit(this); }
 
-	public void setScope(GrammarAST scope) {
+	public void setScope(ANTLRParser.ActionScopeNameContext scope) {
 		this.scope = scope;
 	}
 
-	public GrammarAST getScope() {
+	public ANTLRParser.ActionScopeNameContext getScope() {
 		return scope;
 	}
 

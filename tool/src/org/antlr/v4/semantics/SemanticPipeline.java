@@ -86,7 +86,7 @@ public class SemanticPipeline {
 		SymbolChecks symcheck = new SymbolChecks(g, collector);
 		symcheck.process(); // side-effect: strip away redef'd rules.
 
-		for (GrammarAST a : collector.namedActions) {
+		for (ANTLRParser.Action_Context a : collector.namedActions) {
 			g.defineAction(a);
 		}
 

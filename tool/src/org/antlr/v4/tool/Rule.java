@@ -7,6 +7,7 @@
 package org.antlr.v4.tool;
 
 import org.antlr.v4.parse.ANTLRParser;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.Pair;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.antlr.v4.tool.ast.ActionAST;
@@ -353,4 +354,12 @@ public class Rule implements AttributeResolver {
 		buf.append("}");
 		return buf.toString();
     }
+
+	public Token getRuleToken() {
+		if (lexerAst != null) {
+			return lexerAst.TOKEN_REF().getSymbol();
+		} else {
+			return parserAst.RULE_REF().getSymbol();
+		}
+	}
 }

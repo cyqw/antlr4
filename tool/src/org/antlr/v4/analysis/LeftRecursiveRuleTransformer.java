@@ -10,7 +10,6 @@ import org.antlr.v4.Tool;
 import org.antlr.v4.misc.OrderedHashMap;
 import org.antlr.v4.parse.ANTLRLexer;
 import org.antlr.v4.parse.ANTLRParser;
-import org.antlr.v4.parse.GrammarASTAdaptor;
 import org.antlr.v4.parse.ScopeParser;
 import org.antlr.v4.parse.ToolANTLRParser;
 import org.antlr.v4.runtime.CharStreams;
@@ -67,7 +66,7 @@ public class LeftRecursiveRuleTransformer {
 		List<String> leftRecursiveRuleNames = new ArrayList<String>();
 		for (Rule r : rules) {
 			if ( !Grammar.isTokenName(r.name) ) {
-				if ( LeftRecursiveRuleAnalyzer.hasImmediateRecursiveRuleRefs(r.parserAst, r.name) ) {
+				if ( r instanceof LeftRecursiveRule ) {
 					boolean fitsPattern = translateLeftRecursiveRule(ast, (LeftRecursiveRule)r, language);
 					if ( fitsPattern ) {
 						leftRecursiveRuleNames.add(r.name);
@@ -130,8 +129,6 @@ public class LeftRecursiveRuleTransformer {
 
 		// Reduce sets in newly created rule tree
 		GrammarTransformPipeline transform = new GrammarTransformPipeline(g, g.tool);
-		transform.reduceBlocksToSets(r.ast);
-		transform.expandParameterizedLoops(r.ast);
 
 		// Rerun semantic checks on the new rule
 		RuleCollector ruleCollector = new RuleCollector(g);

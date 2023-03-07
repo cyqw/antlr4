@@ -389,10 +389,10 @@ public class Grammar implements AttributeResolver {
 		}
     }
 
-    public void defineAction(GrammarAST atAST) {
-        if ( atAST.getChildCount()==2 ) {
-            String name = atAST.getChild(0).getText();
-            namedActions.put(name, (ActionAST)atAST.getChild(1));
+    public void defineAction(ANTLRParser.Action_Context atAST) {
+        if ( atAST.actionScopeName() == null ) {
+            String name = atAST.identifier().getText();
+            namedActions.put(name, new ActionAST(atAST.actionBlock()));
         }
         else {
 			String scope = atAST.getChild(0).getText();

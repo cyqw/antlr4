@@ -17,9 +17,7 @@ import org.antlr.v4.test.runtime.RuntimeTestUtils;
 import org.antlr.v4.tool.ErrorType;
 import org.antlr.v4.tool.Grammar;
 import org.antlr.v4.tool.LexerGrammar;
-import org.antlr.v4.tool.ast.GrammarAST;
 import org.antlr.v4.tool.ast.GrammarRootAST;
-import org.antlr.v4.tool.ast.RuleAST;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;

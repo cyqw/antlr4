@@ -6,7 +6,6 @@
 
 package org.antlr.v4.tool.ast;
 
-import org.antlr.v4.parse.GrammarASTAdaptor;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.Parser;
@@ -17,7 +16,6 @@ import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.misc.IntervalSet;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
-import org.antlr.v4.tool.CommonTreeNodeStream;
 import org.antlr.v4.tool.Grammar;
 
 import java.util.ArrayList;
