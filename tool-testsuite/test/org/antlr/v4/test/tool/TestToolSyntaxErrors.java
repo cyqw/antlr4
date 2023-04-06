@@ -330,7 +330,7 @@ public class TestToolSyntaxErrors {
 			"s : (a a)* ;\n"+
 			"a : 'foo'* ;\n";
 		String expected =
-			"error(" + ErrorType.EPSILON_CLOSURE.code + "): A.g4:2:0: rule s contains a closure with at least one alternative that can match an empty string\n";
+			"error(" + ErrorType.EPSILON_CLOSURE.code + "): T.g4:2:0: rule s contains a closure with at least one alternative that can match an empty string\n";
 
 		String[] pair = new String[] {
 			grammar,
@@ -348,7 +348,7 @@ public class TestToolSyntaxErrors {
 				"fragment FRAGMENT: ('x'|)+;";
 
 		String expected =
-			"error(" + ErrorType.EPSILON_CLOSURE.code + "): A.g4:3:9: rule FRAGMENT contains a closure with at least one alternative that can match an empty string\n";
+			"error(" + ErrorType.EPSILON_CLOSURE.code + "): T.g4:3:9: rule FRAGMENT contains a closure with at least one alternative that can match an empty string\n";
 
 		String[] pair = new String[] {
 				grammar,
@@ -383,7 +383,7 @@ public class TestToolSyntaxErrors {
 			"s : (a a)? ;\n"+
 			"a : 'foo'* ;\n";
 		String expected =
-			"warning(" + ErrorType.EPSILON_OPTIONAL.code + "): A.g4:2:0: rule s contains an optional block with at least one alternative that can match an empty string\n";
+			"warning(" + ErrorType.EPSILON_OPTIONAL.code + "): T.g4:2:0: rule s contains an optional block with at least one alternative that can match an empty string\n";
 
 		String[] pair = new String[] {
 			grammar,
@@ -549,11 +549,11 @@ public class TestToolSyntaxErrors {
 			"Error3: '';\n" +
 			"NotError: ' ';";
 		String expected =
-			"error(" + ErrorType.EMPTY_STRINGS_AND_SETS_NOT_ALLOWED.code + "): A.g4:2:8: string literals and sets cannot be empty: ''\n" +
-			"error(" + ErrorType.EMPTY_STRINGS_AND_SETS_NOT_ALLOWED.code + "): A.g4:2:16: string literals and sets cannot be empty: ''\n" +
-			"error(" + ErrorType.EMPTY_STRINGS_AND_SETS_NOT_ALLOWED.code + "): A.g4:3:8: string literals and sets cannot be empty: ''\n" +
-			"error(" + ErrorType.EMPTY_STRINGS_AND_SETS_NOT_ALLOWED.code + "): A.g4:4:15: string literals and sets cannot be empty: ''\n" +
-			"error(" + ErrorType.EMPTY_STRINGS_AND_SETS_NOT_ALLOWED.code + "): A.g4:5:8: string literals and sets cannot be empty: ''\n";
+			"error(" + ErrorType.EMPTY_STRINGS_AND_SETS_NOT_ALLOWED.code + "): T.g4:2:8: string literals and sets cannot be empty: ''\n" +
+			"error(" + ErrorType.EMPTY_STRINGS_AND_SETS_NOT_ALLOWED.code + "): T.g4:2:16: string literals and sets cannot be empty: ''\n" +
+			"error(" + ErrorType.EMPTY_STRINGS_AND_SETS_NOT_ALLOWED.code + "): T.g4:3:8: string literals and sets cannot be empty: ''\n" +
+			"error(" + ErrorType.EMPTY_STRINGS_AND_SETS_NOT_ALLOWED.code + "): T.g4:4:15: string literals and sets cannot be empty: ''\n" +
+			"error(" + ErrorType.EMPTY_STRINGS_AND_SETS_NOT_ALLOWED.code + "): T.g4:5:8: string literals and sets cannot be empty: ''\n";
 
 		String[] pair = new String[] {
 				grammar,
@@ -780,7 +780,7 @@ public class TestToolSyntaxErrors {
 			"start : EOF;\n";
 
 		String expected =
-			"error(" + ErrorType.CHANNELS_BLOCK_IN_PARSER_GRAMMAR.code + "): A.g4:3:0: custom channels are not supported in parser grammars\n";
+			"error(" + ErrorType.CHANNELS_BLOCK_IN_PARSER_GRAMMAR.code + "): T.g4:3:0: custom channels are not supported in parser grammars\n";
 
 		String[] pair = { grammar, expected };
 		testErrors(pair, true);
@@ -801,9 +801,9 @@ public class TestToolSyntaxErrors {
 			"WHITESPACE: [ \\t]+      -> channel(WHITESPACE_CHANNEL);\n";
 
 		String expected =
-			"error(" + ErrorType.CONSTANT_VALUE_IS_NOT_A_RECOGNIZED_CHANNEL_NAME.code + "): A.g4:10:35: COMMENT_CHANNEL is not a recognized channel name\n" +
-			"error(" + ErrorType.CONSTANT_VALUE_IS_NOT_A_RECOGNIZED_CHANNEL_NAME.code + "): A.g4:11:35: WHITESPACE_CHANNEL is not a recognized channel name\n" +
-			"error(" + ErrorType.CHANNELS_BLOCK_IN_COMBINED_GRAMMAR.code + "): A.g4:3:0: custom channels are not supported in combined grammars\n";
+			"error(" + ErrorType.CONSTANT_VALUE_IS_NOT_A_RECOGNIZED_CHANNEL_NAME.code + "): T.g4:10:35: COMMENT_CHANNEL is not a recognized channel name\n" +
+			"error(" + ErrorType.CONSTANT_VALUE_IS_NOT_A_RECOGNIZED_CHANNEL_NAME.code + "): T.g4:11:35: WHITESPACE_CHANNEL is not a recognized channel name\n" +
+			"error(" + ErrorType.CHANNELS_BLOCK_IN_COMBINED_GRAMMAR.code + "): T.g4:3:0: custom channels are not supported in combined grammars\n";
 
 		String[] pair = { grammar, expected };
 		testErrors(pair, true);
@@ -830,7 +830,7 @@ public class TestToolSyntaxErrors {
 
 		// WHITESPACE_CHANNEL and COMMENT_CHANNEL are defined, but NEWLINE_CHANNEL is not
 		String expected =
-			"error(" + ErrorType.CONSTANT_VALUE_IS_NOT_A_RECOGNIZED_CHANNEL_NAME.code + "): A.g4:10:34: NEWLINE_CHANNEL is not a recognized channel name\n";
+			"error(" + ErrorType.CONSTANT_VALUE_IS_NOT_A_RECOGNIZED_CHANNEL_NAME.code + "): T.g4:10:34: NEWLINE_CHANNEL is not a recognized channel name\n";
 
 		String[] pair = { grammar, expected };
 		testErrors(pair, true);
@@ -842,7 +842,7 @@ public class TestToolSyntaxErrors {
 			"grammar T;\n"+
 			"a:  'A'..'Z' ;\n";
 		String expected =
-			"error(" + ErrorType.TOKEN_RANGE_IN_PARSER.code + "): A.g4:2:4: token ranges not allowed in parser: 'A'..'Z'\n";
+			"error(" + ErrorType.TOKEN_RANGE_IN_PARSER.code + "): T.g4:2:4: token ranges not allowed in parser: 'A'..'Z'\n";
 
 		String[] pair = new String[] {
 			grammar,
@@ -866,6 +866,6 @@ public class TestToolSyntaxErrors {
 				"A : h=~('b'|'c') ;";
 		testErrors(new String[] {
 				grammar,
-				"error(" + ErrorType.SYNTAX_ERROR.code + "): A.g4:3:5: syntax error: '=' came as a complete surprise to me while looking for lexer rule element\n" }, false);
+				"error(" + ErrorType.SYNTAX_ERROR.code + "): T.g4:3:5: syntax error: '=' came as a complete surprise to me while looking for lexer rule element\n" }, false);
 	}
 }

@@ -6,7 +6,6 @@
 
 package org.antlr.v4.codegen.model;
 
-import org.antlr.runtime.CommonToken;
 import org.antlr.v4.codegen.ActionTranslator;
 import org.antlr.v4.codegen.OutputModelFactory;
 import org.antlr.v4.codegen.model.chunk.ActionChunk;
@@ -14,6 +13,7 @@ import org.antlr.v4.codegen.model.chunk.ActionTemplate;
 import org.antlr.v4.codegen.model.chunk.ActionText;
 import org.antlr.v4.codegen.model.decl.StructDecl;
 import org.antlr.v4.parse.ANTLRParser;
+import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.tool.ast.ActionAST;
 import org.stringtemplate.v4.ST;
 

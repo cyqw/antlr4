@@ -6,9 +6,6 @@
 
 package org.antlr.v4.codegen.model;
 
-import org.antlr.runtime.RecognitionException;
-import org.antlr.runtime.tree.CommonTree;
-import org.antlr.runtime.tree.CommonTreeNodeStream;
 import org.antlr.v4.codegen.OutputModelFactory;
 import org.antlr.v4.codegen.model.decl.AltLabelStructDecl;
 import org.antlr.v4.codegen.model.decl.AttributeDecl;
@@ -22,7 +19,7 @@ import org.antlr.v4.codegen.model.decl.Decl;
 import org.antlr.v4.codegen.model.decl.StructDecl;
 import org.antlr.v4.misc.FrequencySet;
 import org.antlr.v4.misc.Utils;
-import org.antlr.v4.parse.GrammarASTAdaptor;
+import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.atn.ATNState;
 import org.antlr.v4.runtime.misc.IntervalSet;
 import org.antlr.v4.runtime.misc.OrderedHashSet;
@@ -44,9 +41,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.antlr.v4.parse.ANTLRParser.RULE_REF;
-import static org.antlr.v4.parse.ANTLRParser.STRING_LITERAL;
-import static org.antlr.v4.parse.ANTLRParser.TOKEN_REF;
+import static org.antlr.v4.parse.ANTLRParser.*;
 
 /** */
 public class RuleFunction extends OutputModelObject {
@@ -224,7 +219,7 @@ public class RuleFunction extends OutputModelObject {
 	private List<GrammarAST> getRuleTokens(List<GrammarAST> refs) {
 		List<GrammarAST> result = new ArrayList<>(refs.size());
 		for (GrammarAST ref : refs) {
-			CommonTree r = ref;
+			GrammarAST r = ref;
 
 			boolean ignore = false;
 			while (r != null) {

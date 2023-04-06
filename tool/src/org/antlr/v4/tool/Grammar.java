@@ -395,11 +395,11 @@ public class Grammar implements AttributeResolver {
             namedActions.put(name, new ActionAST(atAST.actionBlock()));
         }
         else {
-			String scope = atAST.getChild(0).getText();
+			String scope = atAST.actionScopeName().getText();
             String gtype = getTypeString();
             if ( scope.equals(gtype) || (scope.equals("parser")&&gtype.equals("combined")) ) {
-				String name = atAST.getChild(1).getText();
-				namedActions.put(name, (ActionAST)atAST.getChild(2));
+				String name = atAST.identifier().getText();
+				namedActions.put(name, new ActionAST(atAST.actionBlock()));
 			}
         }
     }

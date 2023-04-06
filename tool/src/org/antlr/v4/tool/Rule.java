@@ -77,8 +77,8 @@ public class Rule implements AttributeResolver {
      *  I track the AST node for the action in case I need the line number
      *  for errors.
      */
-    public Map<String, ANTLRParser.ActionBlockContext> namedActions =
-        new HashMap<String, ANTLRParser.ActionBlockContext>();
+    public Map<String, ActionAST> namedActions =
+        new HashMap<String, ActionAST>();
 
     /** Track exception handlers; points at "catch" node of (catch exception action)
 	 *  don't track finally action

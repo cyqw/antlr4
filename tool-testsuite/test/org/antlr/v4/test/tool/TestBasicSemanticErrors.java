@@ -60,7 +60,7 @@ public class TestBasicSemanticErrors {
 			"";
 
 		String expected =
-			"error(" + ErrorType.LABEL_BLOCK_NOT_A_SET.code + "): A.g4:2:5: label op assigned to a block which is not a set\n";
+			"error(" + ErrorType.LABEL_BLOCK_NOT_A_SET.code + "): T.g4:2:5: label op assigned to a block which is not a set\n";
 
 		testErrors(new String[] { grammar, expected }, false);
 	}
@@ -75,16 +75,16 @@ public class TestBasicSemanticErrors {
 			"expr : '=';\n";
 
 		String expected =
-			"error(" + ErrorType.ARG_CONFLICTS_WITH_RULE.code + "): A.g4:2:7: parameter expr conflicts with rule with same name\n" +
-			"error(" + ErrorType.RETVAL_CONFLICTS_WITH_RULE.code + "): A.g4:2:26: return value expr conflicts with rule with same name\n" +
-			"error(" + ErrorType.LOCAL_CONFLICTS_WITH_RULE.code + "): A.g4:3:12: local expr conflicts with rule with same name\n" +
-			"error(" + ErrorType.RETVAL_CONFLICTS_WITH_ARG.code + "): A.g4:2:26: return value expr conflicts with parameter with same name\n" +
-			"error(" + ErrorType.LOCAL_CONFLICTS_WITH_ARG.code + "): A.g4:3:12: local expr conflicts with parameter with same name\n" +
-			"error(" + ErrorType.LOCAL_CONFLICTS_WITH_RETVAL.code + "): A.g4:3:12: local expr conflicts with return value with same name\n" +
-			"error(" + ErrorType.LABEL_CONFLICTS_WITH_RULE.code + "): A.g4:4:4: label expr conflicts with rule with same name\n" +
-			"error(" + ErrorType.LABEL_CONFLICTS_WITH_ARG.code + "): A.g4:4:4: label expr conflicts with parameter with same name\n" +
-			"error(" + ErrorType.LABEL_CONFLICTS_WITH_RETVAL.code + "): A.g4:4:4: label expr conflicts with return value with same name\n" +
-			"error(" + ErrorType.LABEL_CONFLICTS_WITH_LOCAL.code + "): A.g4:4:4: label expr conflicts with local with same name\n";
+			"error(" + ErrorType.ARG_CONFLICTS_WITH_RULE.code + "): T.g4:2:7: parameter expr conflicts with rule with same name\n" +
+			"error(" + ErrorType.RETVAL_CONFLICTS_WITH_RULE.code + "): T.g4:2:26: return value expr conflicts with rule with same name\n" +
+			"error(" + ErrorType.LOCAL_CONFLICTS_WITH_RULE.code + "): T.g4:3:12: local expr conflicts with rule with same name\n" +
+			"error(" + ErrorType.RETVAL_CONFLICTS_WITH_ARG.code + "): T.g4:2:26: return value expr conflicts with parameter with same name\n" +
+			"error(" + ErrorType.LOCAL_CONFLICTS_WITH_ARG.code + "): T.g4:3:12: local expr conflicts with parameter with same name\n" +
+			"error(" + ErrorType.LOCAL_CONFLICTS_WITH_RETVAL.code + "): T.g4:3:12: local expr conflicts with return value with same name\n" +
+			"error(" + ErrorType.LABEL_CONFLICTS_WITH_RULE.code + "): T.g4:4:4: label expr conflicts with rule with same name\n" +
+			"error(" + ErrorType.LABEL_CONFLICTS_WITH_ARG.code + "): T.g4:4:4: label expr conflicts with parameter with same name\n" +
+			"error(" + ErrorType.LABEL_CONFLICTS_WITH_RETVAL.code + "): T.g4:4:4: label expr conflicts with return value with same name\n" +
+			"error(" + ErrorType.LABEL_CONFLICTS_WITH_LOCAL.code + "): T.g4:4:4: label expr conflicts with local with same name\n";
 		ST grammarST = new ST(grammarTemplate);
 		grammarST.add("args", "int expr");
 		grammarST.add("retvals", "int expr");

@@ -261,7 +261,7 @@ public class TestCompositeGrammars {
 
 		FileUtils.mkdir(tempDirPath);
 		writeFile(tempDirPath, "S.g4", slaveS);
-		writeFile(tempDirPath, "A.g4", slaveT);
+		writeFile(tempDirPath, "T.g4", slaveT);
 
 		String master =
 			"// The lexer will create rules to match letters a, b, c.\n"+
@@ -440,7 +440,7 @@ public class TestCompositeGrammars {
 			"parser grammar T;\n" +
 			"a : T ;\n" ;
 		FileUtils.mkdir(tempDirPath);
-		writeFile(tempDirPath, "A.g4", slave);
+		writeFile(tempDirPath, "T.g4", slave);
 		String slave2 =
 			"parser grammar S;\n" +
 			"import T;\n" +
@@ -477,7 +477,7 @@ public class TestCompositeGrammars {
 			"tokens{T}\n" +
 			"x : T ;\n" ;
 		FileUtils.mkdir(tempDirPath);
-		writeFile(tempDirPath, "A.g4", slave);
+		writeFile(tempDirPath, "T.g4", slave);
 		slave =
 			"parser grammar S;\n" +
 			"import T;\n" +
@@ -535,7 +535,7 @@ public class TestCompositeGrammars {
 			"parser grammar T;\n" +
 			"x : T ;\n" ;
 		FileUtils.mkdir(tempDirPath);
-		writeFile(tempDirPath, "A.g4", slave);
+		writeFile(tempDirPath, "T.g4", slave);
 		String slave2 =
 			"parser grammar S;\n" + // A, B, C token type order
 			"import T;\n" +
@@ -680,7 +680,7 @@ public class TestCompositeGrammars {
 		FileUtils.mkdir(tempDirPath);
 		writeFile(tempDirPath, "Java.g4", slave);
 		ExecutedState executedState = execParser(
-				"A.g4", master, "TParser", "TLexer", "s", "a=b", debug,
+				"T.g4", master, "TParser", "TLexer", "s", "a=b", debug,
 				tempDir);
 		assertEquals("", executedState.output);
 		assertEquals("", executedState.errors);

@@ -221,7 +221,7 @@ public class TestParserProfiler {
 			"PLUS : '+' ;\n" +
 			"MULT : '*' ;\n";
 
-		RunOptions runOptions = createOptionsForJavaToolTests("A.g4", grammar, "TParser", "TLexer",
+		RunOptions runOptions = createOptionsForJavaToolTests("T.g4", grammar, "TParser", "TLexer",
 				false, false, "s", "xyz;abc;z.q",
 				true, false, Stage.Execute, false);
 		try (JavaRunner runner = new JavaRunner()) {

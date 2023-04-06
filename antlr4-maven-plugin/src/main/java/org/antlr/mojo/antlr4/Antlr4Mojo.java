@@ -524,7 +524,7 @@ public class Antlr4Mojo extends AbstractMojo {
 				return new StringWriter();
 			}
 			// output directory is a function of where the grammar file lives
-			// for subdir/A.g4, you get subdir here.  Well, depends on -o etc...
+			// for subdir/T.g4, you get subdir here.  Well, depends on -o etc...
 			// But, if this is a .tokens file, then we force the output to
 			// be the base output directory (or current directory if there is not a -o)
 			//

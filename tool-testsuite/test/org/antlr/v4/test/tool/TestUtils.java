@@ -35,10 +35,10 @@ public class TestUtils {
 
 	@Test
 	public void testNodesToStrings() {
-		ArrayList<TerminalNode> values = new ArrayList<>();
-		values.add(new TerminalNodeImpl(new CommonToken(Token.EOR_TOKEN_TYPE)));
-		values.add(new TerminalNodeImpl(new CommonToken(Token.DOWN)));
-		values.add(new TerminalNodeImpl(new CommonToken(Token.UP)));
+		ArrayList<GrammarAST> values = new ArrayList<>();
+		values.add(new GrammarAST(Token.EOR_TOKEN_TYPE));
+		values.add(new GrammarAST(Token.DOWN));
+		values.add(new GrammarAST(Token.UP));
 
 		assertNull(Utils.nodesToStrings(null));
 		assertNotNull(Utils.nodesToStrings(values));
