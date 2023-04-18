@@ -6,9 +6,9 @@
 
 package org.antlr.v4.test.tool;
 
-import org.antlr.runtime.ANTLRStringStream;
-import org.antlr.runtime.Token;
 import org.antlr.v4.parse.ActionSplitter;
+import org.antlr.v4.runtime.ANTLRStringStream;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.semantics.BlankActionSplitterListener;
 import org.junit.jupiter.api.Test;
 

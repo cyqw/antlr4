@@ -1,7 +1,7 @@
 package org.antlr.v4.parse;
 
-import org.antlr.runtime.ANTLRStringStream;
-import org.antlr.runtime.Token;
+import org.antlr.v4.runtime.ANTLRStringStream;
+import org.antlr.v4.runtime.Token;
 
 import java.util.List;
 

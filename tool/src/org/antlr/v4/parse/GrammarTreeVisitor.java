@@ -1,7 +1,7 @@
 package org.antlr.v4.parse;
 
-import org.antlr.runtime.RecognitionException;
-import org.antlr.runtime.tree.TreeNodeStream;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.tree.TreeNodeStream;
 import org.antlr.v4.tool.ErrorManager;
 import org.antlr.v4.tool.ast.ActionAST;
 import org.antlr.v4.tool.ast.AltAST;

@@ -6,7 +6,7 @@
 
 package org.antlr.mojo.antlr4;
 
-import org.antlr.runtime.tree.Tree;
+import org.antlr.v4.runtime.tree.Tree;
 import org.antlr.v4.Tool;
 import org.antlr.v4.misc.Graph;
 import org.antlr.v4.parse.ANTLRParser;

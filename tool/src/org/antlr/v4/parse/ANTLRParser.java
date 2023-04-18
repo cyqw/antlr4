@@ -1,10 +1,10 @@
 package org.antlr.v4.parse;
 
-import org.antlr.runtime.CommonTokenStream;
-import org.antlr.runtime.Parser;
-import org.antlr.runtime.ParserRuleReturnScope;
-import org.antlr.runtime.RecognitionException;
-import org.antlr.runtime.TokenStream;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.Parser;
+import org.antlr.v4.runtime.ParserRuleReturnScope;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.tool.ErrorType;
 
 import java.util.Deque;
@@ -49,13 +49,13 @@ public abstract class ANTLRParser extends Parser {
 	protected Deque<String> paraphrases;
 
 	public ANTLRParser(TokenStream input) {
-		super(new CommonTokenStream());
+		super(new CommonTokenStream(input.getTokenSource()));
 	}
 
 	public abstract void displayRecognitionError(String[] tokenNames,
 												 RecognitionException e);
 
-	public abstract void grammarError(ErrorType etype, org.antlr.runtime.Token token, Object... args);
+	public abstract void grammarError(ErrorType etype, org.antlr.v4.runtime.Token token, Object... args);
 
 	public ParserRuleReturnScope grammarSpec() throws RecognitionException {
 		return null;

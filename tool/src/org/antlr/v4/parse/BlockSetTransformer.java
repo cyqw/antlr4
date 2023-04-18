@@ -1,6 +1,6 @@
 package org.antlr.v4.parse;
 
-import org.antlr.runtime.tree.CommonTreeNodeStream;
+import org.antlr.v4.runtime.tree.CommonTreeNodeStream;
 import org.antlr.v4.tool.Grammar;
 import org.antlr.v4.tool.ast.GrammarAST;
 

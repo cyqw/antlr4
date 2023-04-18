@@ -6,8 +6,8 @@
 
 package org.antlr.v4.parse;
 
-import org.antlr.runtime.IntStream;
-import org.antlr.runtime.RecognitionException;
+import org.antlr.v4.runtime.IntStream;
+import org.antlr.v4.runtime.RecognitionException;
 
 /** */
 public class v4ParserException extends RecognitionException {

@@ -6,7 +6,7 @@
 
 package org.antlr.v4.codegen.model;
 
-import org.antlr.runtime.CommonToken;
+import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.codegen.ActionTranslator;
 import org.antlr.v4.codegen.OutputModelFactory;
 import org.antlr.v4.codegen.model.chunk.ActionChunk;

@@ -113,8 +113,8 @@ public class ErrorManager {
 
 	public void syntaxError(ErrorType etype,
 								   String fileName,
-								   org.antlr.runtime.Token token,
-								   org.antlr.runtime.RecognitionException antlrException,
+								   org.antlr.v4.runtime.Token token,
+								   org.antlr.v4.runtime.RecognitionException antlrException,
 								   Object... args)
 	{
 		ANTLRMessage msg = new GrammarSyntaxMessage(etype,fileName,token,antlrException,args);
@@ -155,7 +155,7 @@ public class ErrorManager {
 
     public void grammarError(ErrorType etype,
 							 String fileName,
-							 org.antlr.runtime.Token token,
+							 org.antlr.v4.runtime.Token token,
 							 Object... args)
 	{
         ANTLRMessage msg = new GrammarSemanticsMessage(etype,fileName,token,args);

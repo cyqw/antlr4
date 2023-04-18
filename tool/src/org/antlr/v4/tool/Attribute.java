@@ -6,7 +6,7 @@
 
 package org.antlr.v4.tool;
 
-import org.antlr.runtime.Token;
+import org.antlr.v4.runtime.Token;
 
 /** Track the names of attributes defined in arg lists, return values,
  *  scope blocks etc...

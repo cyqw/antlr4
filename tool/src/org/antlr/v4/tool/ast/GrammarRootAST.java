@@ -6,9 +6,9 @@
 
 package org.antlr.v4.tool.ast;
 
-import org.antlr.runtime.Token;
-import org.antlr.runtime.TokenStream;
-import org.antlr.runtime.tree.Tree;
+import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.TokenStream;
+import org.antlr.v4.runtime.tree.Tree;
 
 import java.util.HashMap;
 import java.util.Map;

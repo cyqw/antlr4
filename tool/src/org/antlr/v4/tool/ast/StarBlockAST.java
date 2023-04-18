@@ -6,7 +6,7 @@
 
 package org.antlr.v4.tool.ast;
 
-import org.antlr.runtime.Token;
+import org.antlr.v4.runtime.Token;
 
 public class StarBlockAST extends GrammarAST implements RuleElementAST, QuantifierAST {
 	private final boolean _greedy;

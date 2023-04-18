@@ -6,12 +6,12 @@
 
 package org.antlr.v4.tool;
 
-import org.antlr.runtime.CommonToken;
-import org.antlr.runtime.tree.CommonTree;
-import org.antlr.runtime.tree.CommonTreeNodeStream;
-import org.antlr.runtime.tree.Tree;
-import org.antlr.runtime.tree.TreeVisitor;
-import org.antlr.runtime.tree.TreeVisitorAction;
+import org.antlr.v4.runtime.CommonToken;
+import org.antlr.v4.runtime.tree.CommonTree;
+import org.antlr.v4.runtime.tree.CommonTreeNodeStream;
+import org.antlr.v4.runtime.tree.Tree;
+import org.antlr.v4.runtime.tree.TreeVisitor;
+import org.antlr.v4.runtime.tree.TreeVisitorAction;
 import org.antlr.v4.Tool;
 import org.antlr.v4.analysis.LeftRecursiveRuleTransformer;
 import org.antlr.v4.parse.ANTLRParser;
@@ -215,7 +215,7 @@ public class GrammarTransformPipeline {
 					tokensRoot.g = rootGrammar;
 					root.insertChild(1, tokensRoot); // ^(GRAMMAR ID TOKENS...)
 				}
-				tokensRoot.addChildren(Arrays.asList(imp_tokensRoot.getChildren().toArray(new Tree[0])));
+				tokensRoot.addChildren(Arrays.asList(imp_tokensRoot.getChildren().toArray(new CommonTree[0])));
 			}
 
 			List<GrammarAST> all_actionRoots = new ArrayList<GrammarAST>();

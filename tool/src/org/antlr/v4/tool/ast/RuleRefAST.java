@@ -6,8 +6,8 @@
 
 package org.antlr.v4.tool.ast;
 
-import org.antlr.runtime.CommonToken;
-import org.antlr.runtime.Token;
+import org.antlr.v4.runtime.CommonToken;
+import org.antlr.v4.runtime.Token;
 
 public class RuleRefAST extends GrammarASTWithOptions implements RuleElementAST {
 	public RuleRefAST(RuleRefAST node) {

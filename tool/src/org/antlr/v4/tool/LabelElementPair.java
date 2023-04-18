@@ -6,16 +6,17 @@
 
 package org.antlr.v4.tool;
 
-import org.antlr.runtime.BitSet;
 import org.antlr.v4.parse.ANTLRParser;
 import org.antlr.v4.tool.ast.GrammarAST;
+
+import java.util.BitSet;
 
 public class LabelElementPair {
     public static final BitSet tokenTypeForTokens = new BitSet();
     static {
-        tokenTypeForTokens.add(ANTLRParser.TOKEN_REF);
-        tokenTypeForTokens.add(ANTLRParser.STRING_LITERAL);
-        tokenTypeForTokens.add(ANTLRParser.WILDCARD);
+        tokenTypeForTokens.set(ANTLRParser.TOKEN_REF);
+        tokenTypeForTokens.set(ANTLRParser.STRING_LITERAL);
+        tokenTypeForTokens.set(ANTLRParser.WILDCARD);
     }
 
     public GrammarAST label;

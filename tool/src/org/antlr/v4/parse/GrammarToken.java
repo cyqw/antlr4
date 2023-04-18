@@ -6,8 +6,8 @@
 
 package org.antlr.v4.parse;
 
-import org.antlr.runtime.CommonToken;
-import org.antlr.runtime.Token;
+import org.antlr.v4.runtime.CommonToken;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.tool.Grammar;
 
 /** A CommonToken that can also track it's original location,

@@ -6,7 +6,7 @@
 
 package org.antlr.v4.codegen;
 
-import org.antlr.runtime.tree.CommonTreeNodeStream;
+import org.antlr.v4.runtime.tree.CommonTreeNodeStream;
 import org.antlr.v4.analysis.LeftRecursiveRuleAltInfo;
 import org.antlr.v4.codegen.model.Action;
 import org.antlr.v4.codegen.model.AltBlock;
@@ -281,7 +281,7 @@ public class OutputModelController {
 			function.code = DefaultOutputModelFactory.list(walker.block(null, null));
 			function.hasLookaheadBlock = walker.hasLookaheadBlock;
 		}
-		catch (org.antlr.runtime.RecognitionException e){
+		catch (org.antlr.v4.runtime.RecognitionException e){
 			e.printStackTrace(System.err);
 		}
 

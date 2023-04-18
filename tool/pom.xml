@@ -28,14 +28,15 @@
 		</dependency>
 		<dependency>
 			<groupId>org.antlr</groupId>
-			<artifactId>antlr-runtime</artifactId>
-			<version>3.5.3</version>
-		</dependency>
-		<dependency>
-			<groupId>org.antlr</groupId>
 			<artifactId>ST4</artifactId>
 			<version>4.3.4</version>
-		</dependency>
+            <exclusions>
+                <exclusion>
+                    <artifactId>antlr-runtime</artifactId>
+                    <groupId>org.antlr</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
 		<dependency>
 			<groupId>org.abego.treelayout</groupId>
 			<artifactId>org.abego.treelayout.core</artifactId>
@@ -141,16 +142,21 @@
 			</plugin>
 			<plugin>
 				<groupId>org.antlr</groupId>
-				<artifactId>antlr3-maven-plugin</artifactId>
-				<version>3.5.3</version>
+				<artifactId>antlr4-maven-plugin</artifactId>
+				<version>4.11.1</version>
 				<configuration>
-					<sourceDirectory>src</sourceDirectory>
-					<verbose>true</verbose>
+					<sourceDirectory>src/org/antlr/v4/parse</sourceDirectory>
+                    <includes>A*.g4</includes>
+                    <outputDirectory>${project.build.directory}/generated-sources/antlr4/org/antlr/v4/parse</outputDirectory>
+                    <arguments>
+                        <argument>-package</argument>
+                        <argument>org.antlr.v4.parse</argument>
+                    </arguments>
 				</configuration>
 				<executions>
 					<execution>
 						<goals>
-							<goal>antlr</goal>
+							<goal>antlr4</goal>
 						</goals>
 					</execution>
 				</executions>

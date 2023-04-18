@@ -6,9 +6,9 @@
 
 package org.antlr.v4.semantics;
 
-import org.antlr.runtime.Token;
-import org.antlr.runtime.tree.CommonTree;
-import org.antlr.runtime.tree.Tree;
+import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.tree.CommonTree;
+import org.antlr.v4.runtime.tree.Tree;
 import org.antlr.v4.misc.Utils;
 import org.antlr.v4.parse.ANTLRParser;
 import org.antlr.v4.parse.GrammarTreeVisitor;

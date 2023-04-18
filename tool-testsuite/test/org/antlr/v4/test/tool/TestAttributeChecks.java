@@ -6,7 +6,7 @@
 
 package org.antlr.v4.test.tool;
 
-import org.antlr.runtime.RecognitionException;
+import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.tool.ErrorType;
 import org.junit.jupiter.api.Test;
 import org.stringtemplate.v4.ST;

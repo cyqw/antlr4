@@ -6,7 +6,7 @@
 
 package org.antlr.v4.tool;
 
-import org.antlr.runtime.Token;
+import org.antlr.v4.runtime.Token;
 
 import java.util.Collection;
 

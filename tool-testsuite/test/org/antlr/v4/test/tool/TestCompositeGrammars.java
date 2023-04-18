@@ -6,7 +6,7 @@
 
 package org.antlr.v4.test.tool;
 
-import org.antlr.runtime.RecognitionException;
+import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.test.runtime.*;
 import org.antlr.v4.test.runtime.java.JavaRunner;
 import org.antlr.v4.test.runtime.states.ExecutedState;

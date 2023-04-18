@@ -6,24 +6,25 @@
 
 package org.antlr.v4.tool.ast;
 
-import org.antlr.runtime.CharStream;
-import org.antlr.runtime.CommonToken;
-import org.antlr.runtime.Token;
-import org.antlr.runtime.tree.CommonTree;
-import org.antlr.runtime.tree.CommonTreeNodeStream;
-import org.antlr.runtime.tree.Tree;
 import org.antlr.v4.parse.ANTLRParser;
 import org.antlr.v4.parse.GrammarASTAdaptor;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CommonToken;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.atn.ATNState;
 import org.antlr.v4.runtime.misc.IntervalSet;
+import org.antlr.v4.runtime.tree.CommonTree;
+import org.antlr.v4.runtime.tree.CommonTreeNodeStream;
+import org.antlr.v4.runtime.tree.Tree;
 import org.antlr.v4.tool.Grammar;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.LinkedList;
 import java.util.List;
 
-public class GrammarAST extends CommonTree {
+public abstract class GrammarAST extends CommonTree {
 	/** For error msgs, nice to know which grammar this AST lives in */
 	// TODO: try to remove
 	public Grammar g;
@@ -33,7 +34,7 @@ public class GrammarAST extends CommonTree {
 
 	public String textOverride;
 
-    public GrammarAST() {}
+	public GrammarAST() {}
     public GrammarAST(Token t) { super(t); }
     public GrammarAST(GrammarAST node) {
 		super(node);
@@ -44,12 +45,12 @@ public class GrammarAST extends CommonTree {
     public GrammarAST(int type) { super(new CommonToken(type, ANTLRParser.tokenNames[type])); }
     public GrammarAST(int type, Token t) {
 		this(new CommonToken(t));
-		token.setType(type);
+//		token.setType(type);
 	}
     public GrammarAST(int type, Token t, String text) {
 		this(new CommonToken(t));
-		token.setType(type);
-		token.setText(text);
+//		token.setType(type);
+//		token.setText(text);
     }
 
 	public GrammarAST[] getChildrenAsArray() {
@@ -144,7 +145,7 @@ public class GrammarAST extends CommonTree {
 		return null;
 	}
 
-	public boolean deleteChild(org.antlr.runtime.tree.Tree t) {
+	public boolean deleteChild(org.antlr.v4.runtime.tree.Tree t) {
 		for (int i=0; i<children.size(); i++) {
 			Object c = children.get(i);
 			if ( c == t ) {
@@ -171,12 +172,12 @@ public class GrammarAST extends CommonTree {
     }
 
 	// TODO: don't include this node!!
-	public CommonTree getFirstDescendantWithType(org.antlr.runtime.BitSet types) {
-		if ( types.member(getType()) ) return this;
+	public CommonTree getFirstDescendantWithType(BitSet types) {
+		if ( types.get(getType()) ) return this;
 		if ( children==null ) return null;
 		for (Object c : children) {
 			GrammarAST t = (GrammarAST)c;
-			if ( types.member(t.getType()) ) return t;
+			if ( types.get(t.getType()) ) return t;
 			CommonTree d = t.getFirstDescendantWithType(types);
 			if ( d!=null ) return d;
 		}
@@ -237,4 +238,5 @@ public class GrammarAST extends CommonTree {
 	}
 
 	public Object visit(GrammarASTVisitor v) { return v.visit(this); }
+
 }

@@ -6,8 +6,8 @@
 
 package org.antlr.v4.semantics;
 
-import org.antlr.runtime.tree.CommonTree;
-import org.antlr.runtime.tree.Tree;
+import org.antlr.v4.runtime.tree.CommonTree;
+import org.antlr.v4.runtime.tree.Tree;
 import org.antlr.v4.automata.LexerATNFactory;
 import org.antlr.v4.parse.ANTLRLexer;
 import org.antlr.v4.parse.ANTLRParser;

@@ -1,10 +1,10 @@
 package org.antlr.v4.parse;
 
-import org.antlr.runtime.CharStream;
-import org.antlr.runtime.CommonTokenStream;
-import org.antlr.runtime.Lexer;
-import org.antlr.runtime.RecognitionException;
-import org.antlr.runtime.Token;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.Lexer;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.tool.ErrorType;
 
 public class ANTLRLexer extends Lexer {
@@ -33,5 +33,9 @@ public class ANTLRLexer extends Lexer {
 
 	public int getNumberOfSyntaxErrors() {
 		return 0;
+	}
+
+	public CharStream getCharStream() {
+		return null;
 	}
 }

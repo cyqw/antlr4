@@ -6,7 +6,7 @@
 
 package org.antlr.v4.semantics;
 
-import org.antlr.runtime.Token;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.parse.ActionSplitterListener;
 
 public class BlankActionSplitterListener implements ActionSplitterListener {

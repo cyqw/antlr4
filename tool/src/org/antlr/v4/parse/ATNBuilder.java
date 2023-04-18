@@ -1,7 +1,7 @@
 package org.antlr.v4.parse;
 
-import org.antlr.runtime.RecognitionException;
-import org.antlr.runtime.tree.CommonTreeNodeStream;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.tree.CommonTreeNodeStream;
 import org.antlr.v4.automata.ATNFactory;
 import org.antlr.v4.automata.ParserATNFactory;
 

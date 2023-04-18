@@ -6,7 +6,7 @@
 
 package org.antlr.v4.tool;
 
-import org.antlr.runtime.Token;
+import org.antlr.v4.runtime.Token;
 
 /** A generic message from the tool such as "file not found" type errors; there
  *  is no reason to create a special object for each error unlike the grammar

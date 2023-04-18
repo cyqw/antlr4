@@ -1,6 +1,6 @@
 package org.antlr.v4.automata;
 
-import org.antlr.runtime.tree.CommonTree;
+import org.antlr.v4.runtime.tree.CommonTree;
 import org.antlr.v4.tool.ErrorType;
 import org.antlr.v4.tool.Grammar;
 

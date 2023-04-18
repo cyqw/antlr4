@@ -5,7 +5,7 @@
  */
 package org.antlr.v4.test.tool;
 
-import org.antlr.runtime.misc.FastQueue;
+import org.antlr.v4.runtime.misc.FastQueue;
 import org.junit.jupiter.api.Test;
 
 import java.util.NoSuchElementException;

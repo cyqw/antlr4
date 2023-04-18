@@ -6,9 +6,9 @@
 
 package org.antlr.v4.parse;
 
-import org.antlr.runtime.CharStream;
-import org.antlr.runtime.RecognitionException;
-import org.antlr.runtime.Token;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.Tool;
 import org.antlr.v4.tool.ErrorType;
 

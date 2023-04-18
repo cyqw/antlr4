@@ -1,6 +1,6 @@
 package org.antlr.v4.test.tool;
 
-import org.antlr.runtime.Token;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.misc.Utils;
 import org.antlr.v4.tool.ast.GrammarAST;
 import org.junit.jupiter.api.Test;
